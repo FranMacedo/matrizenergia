@@ -5,3 +5,4 @@ gunicorn==19.8.1
 pandas==0.24.0
 plotly==4.1.0
 xlrd==1.2.0
+dash-bootstrap-components==0.6.1rc1
