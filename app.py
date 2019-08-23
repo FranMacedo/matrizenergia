@@ -8,7 +8,6 @@ from dash.dependencies import Input, Output
 import copy
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
-from decimal import Decimal
 
 ctx = dash.callback_context
 
@@ -366,7 +365,7 @@ donut_container = html.Div([
                         [
                             html.Div([dcc.Loading(id="loading-donut", type="circle",
                                                   style={'margin-left': '0%', 'margin-top': '10%'},
-                                                  children=[dcc.Graph(id="donut-graph")])],
+                                                  children=[dcc.Graph(id="donut-graph", config={'displayModeBar': False})])],
 
                                     # align="center"
                                      className="ten columns",
@@ -432,13 +431,7 @@ single_bar_container = html.Div([
                                                                      id='single_bar_div')]
                                                   )
                                       ],
-
-                                     style={
-                                         # "margin-left": "1rem",
-                                         #"margin-right": "1rem",
-                                         # "bottom": 0,
-                                         # "padding": "0% 0% 0% 0%",
-                                     })
+                                     )
                         ],
                     )
 
@@ -450,11 +443,32 @@ single_bar_container = html.Div([
     className="pretty_container",
 )
 
-year_line_container = html.Div([dcc.Loading(id="loading-ano-line", type="circle",
-                                            children=[dcc.Graph(id="ano-line-graph")])],
-                               className="pretty_container",
-                               style=CONTENT_STYLE_2
-                               )
+year_line_container = html.Div([
+    html.Div(
+        [
+            html.Div([html.P(id='header-ano-line',
+                             style={"textAlign": "center", 'margin': 'auto', 'padding': '8px'}
+                             )
+                      ],
+                     className="twelve columns")
+        ],
+        style={"textAlign": "center"}, className="pretty_container_2 row"
+    ),
+
+    html.Div(
+        [
+            dcc.Loading(
+                id="loading-ano-line",
+                type="circle",
+                children=[dcc.Graph(id="ano-line-graph", config={'displayModeBar': False})]
+            )
+        ],
+        className="twelve columns"
+    )
+],
+    className="pretty_container",
+    style=CONTENT_STYLE_2
+)
 # ], id='single_bar_container', style={'display': 'none'})
 
 app.layout = html.Div([
@@ -571,43 +585,19 @@ def update_year_slider(ano_bar_graph_selected):
 
 @app.callback([Output('header-ano-bar', 'children'),
                Output('header-forma-sector', 'children')],
-              [Input('tabs', 'active_tab')
+              [Input('tabs', 'active_tab'),
+               Input('dd-primaria-final', 'value')
                ]
               )
-def headers_emissoes(at):
+def headers_emissoes(at, prim_fin):
     if not dash.callback_context.triggered:
         raise PreventUpdate
     if at == "tab-emissoes":
         return 'Emissões de CO2 por ano (ton/tep)', 'Emissões de CO2 por:'
-    # "Consumo de Energia:"
+
     else:
-        return 'Consumo total de Energia por ano (tep)', 'Consumo de Energia por:'
-
-#
-# primaria = 0
-# final = 0
-
-# @app.callback(
-#     Output('memory', 'data'),
-#      [Input('primaria', 'n_clicks'),
-#       Input('final', 'n_clicks'),
-#      ],
-#     [State('memory', 'data')]
-# )
-# def update_memory(primaria, final, data):
-#     if primaria is None and final is None:
-#         # prevent the None callbacks is important with the store component.
-#         # you don't want to update the store for nothing.
-#         raise PreventUpdate
-#
-#     data = data or {'final': 0, 'primaria' : 0}
-#
-#     if primaria:
-#         data['primaria'] = data['primaria'] + 1
-#     elif final:
-#         data['final'] = data['final'] + 1
-#
-#     return data
+        head_a_b = 'Consumo total de Energia {} anual (tep)'.format(prim_fin)
+        return head_a_b, 'Consumo de Energia por:'
 
 
 @app.callback(
@@ -683,7 +673,8 @@ def update_ano_bar(ano, prim_fin, at):
     return fig
 
 
-@app.callback(Output('header-donut', 'children'),
+@app.callback([Output('header-ano-line', 'children'),
+              Output('header-donut', 'children')],
               [Input("year-selected", "value"),
                Input('tabs', 'active_tab'),
                Input('dd-primaria-final', 'value'),
@@ -691,17 +682,23 @@ def update_ano_bar(ano, prim_fin, at):
                ],
 
               )
-def header_donut(ano, at, prim_fin, form_sect):
+def header_donut_ano_line(ano, at, prim_fin, form_sect):
     ctx = dash.callback_context
 
     if not ctx.triggered:
         raise PreventUpdate
 
-
     if at == "tab-emissoes":
+        unidade = unidades_emissoes
+
         text_1 = "Emissões de CO2"
+        text_1_1 = ' anuais'
     else:
+        unidade = unidades_energia
+
         text_1 = "Consumo de Energia"
+        text_1_1 = ' anual'
+
 
         if prim_fin == 'Primária':
             text_1 = text_1 + " Primária"
@@ -709,12 +706,15 @@ def header_donut(ano, at, prim_fin, form_sect):
             text_1 = text_1 + " Final"
 
     if form_sect == "Sector":
-        text_2 = ', por Sector de Consumo, em '
+        text_2 = ', por Sector de Consumo'
     else:
-        text_2 = ', por Forma de Energia, em '
-    ano_format = str(ano)
+        text_2 = ', por Forma de Energia'
 
-    return text_1 + text_2 + ano_format
+    ano_format = ', em ' + str(ano)
+    texto_donut = text_1 + text_2 + ano_format
+    texto_line = text_1 + text_1_1 + text_2 + " ({})".format(unidade)
+
+    return texto_line, texto_donut
 
 
 # Donut Total
@@ -1077,8 +1077,7 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
     #layout_bar_single['title'] = dict(text=select, font=dict(size=13), xref='paper', x=0.3)
 
     fig.update_layout(layout_bar_single)
-    valor_total = "{:.2E}".format(Decimal(str(df[select].sum())))
-    valor_total = str(round(df[select].sum(),0))
+    valor_total = str(int(round(df[select].sum(),0)))
 
     value = "                         " + valor_total + " " + unidade
 
@@ -1101,12 +1100,16 @@ def update_ano_line(ano, form_sect, prim_fin, at):
         sector_anual = sector_anual_em
         forma_anual = forma_anual_em
         unidade = unidades_emissoes
+        title_1 = "Emissões de CO2 anuais, por "
     else:
         unidade = unidades_energia
+        title_1 = "Consumo de Energia {} anual, por ".format(prim_fin)
+
 
         if prim_fin == 'Primária':
             sector_anual = change_df('sector_anual', 'primaria')
             forma_anual = change_df('forma_anual', 'primaria')
+            title_2 = prim_fin + " anual, por "
 
         else:
             sector_anual = change_df('sector_anual', 'final')
@@ -1126,6 +1129,7 @@ def update_ano_line(ano, form_sect, prim_fin, at):
         #            for agr, ind, tran, serv, dom in zip(list(df['Agricultura']), list(df['Indústria']),
         #                                                    list(df['Transportes']), list(df['Serviços']),
         #                                                    list(df['Doméstico']))]
+        title_2 = '{0} de Consumo ({1})'.format(form_sect, unidade)
 
     else:
         df = forma_anual.iloc[:, :-1]
@@ -1141,11 +1145,12 @@ def update_ano_line(ano, form_sect, prim_fin, at):
         #                                                    list(df['Gás Natural']), list(df['Gasolina']),
         #                                                    list(df['GPL']),
         #                                                    list(df['Fuel']), list(df['Outros']))]
+        title_2 = '{0} de Energia ({1})'.format(form_sect, unidade)
 
 
     fig = go.Figure()
     i = 0
-
+    title = title_1 + title_2
 
     for trace in df.sum().sort_values().index:
         my_text = [trace + ': ' + '{:.0f}'.format(tr) + ' | ' + unidade for tr in list(df[trace])]
@@ -1162,6 +1167,7 @@ def update_ano_line(ano, form_sect, prim_fin, at):
     layout_ano_line['hovermode'] = "x"
     layout_ano_line['margin'] = dict(l=20, r=20, b=20, t=20)
     layout_ano_line['height'] = 300
+    # layout_ano_line['title'] = dict(text=title, xref='paper', x=0.5)
 
     fig.update_layout(layout_ano_line)
     return fig
