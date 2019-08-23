@@ -1151,7 +1151,7 @@ def update_ano_line(ano, form_sect, prim_fin, at):
         my_text = [trace + ': ' + '{:.0f}'.format(tr) + ' | ' + unidade for tr in list(df[trace])]
         fig.add_trace(go.Scatter(x=anos, y=df[trace], stackgroup='one', name=trace, fillcolor=color_fill[i],
                                  line_color=color_line[i], hovertext=my_text, hoverinfo="text",
-                                 hoverlabel=dict(bgcolor='#f8f9fa',  font=dict(size=13))))
+                                 hoverlabel=dict(bgcolor=color_fill[i],  font=dict(size=13))))
         i += 1
 
     layout_ano_line['legend'] = go.layout.Legend(
