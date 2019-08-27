@@ -964,7 +964,7 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
 
     if form_sect == 'Sector':
 
-        select_dd_text = "Seleccione a Forma de Energia:"
+        select_dd_text = "Seleccione o Sector de Energia:"
 
         df = sector_df
         forma_sector = 'Forma'
@@ -1009,7 +1009,7 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
 
     else:
 
-        select_dd_text = "Seleccione o Sector de Energia:"
+        select_dd_text = "Seleccione a Forma de Energia:"
         df = forma_df
 
         # title = "Consumo de Energia por forma de consumo"
