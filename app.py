@@ -46,6 +46,9 @@ color_5_dead_d = {"Agricultura": color_5_dead[0],
                     "Serviços": color_5_dead[3],
                     "Transportes": color_5_dead[4]}
 
+unidades_emissoes = 'ton'
+unidades_energia = 'tep'
+
 
 def cria_df(file_path):
     forma_df = pd.read_excel(file_path)
@@ -109,42 +112,7 @@ def cria_df(file_path):
     # sector_df['color_dead'] = color_7_dead * len(anos)
     # sector_df['color_live'] = color_7_live * len(anos)
 
-
     return forma_df, sector_df, forma_anual, sector_anual, forma_sector_df, forma_list, sector_list, anos
-
-
-energia_final_path = "data/energia_final.xlsx"
-energia_primaria_path = "data/energia_primaria.xlsx"
-emissoes_path = "data/emissoes_CO2.xlsx"
-
-
-forma_df_fi, sector_df_fi, forma_anual_fi, sector_anual_fi, forma_sector_df_fi, forma_list, sector_list, anos \
-    = cria_df(energia_final_path)
-
-
-
-
-forma_df_pr, sector_df_pr, forma_anual_pr, sector_anual_pr, forma_sector_df_pr, forma_list_pr, sector_list_pr, \
-    anos_pr = cria_df(energia_primaria_path)
-
-forma_df_em, sector_df_em, forma_anual_em, sector_anual_em, forma_sector_df_em, forma_list_em, sector_list_em, \
-    anos_em = cria_df(emissoes_path)
-
-# Total de energia em texto e milhões
-total_m_fi = list(round(forma_anual_fi['Total'] / 1000000, 1))
-total_m_fi = list(map(str, total_m_fi))
-total_m_fi = [a + 'M' for a in total_m_fi]
-
-total_m_pr = list(round(forma_anual_pr['Total'] / 1000000, 1))
-total_m_pr = list(map(str, total_m_pr))
-total_m_pr = [a + 'M' for a in total_m_pr]
-
-total_m_em = list(round(forma_anual_em['Total'] / 1000 / 1000000, 1))
-total_m_em = list(map(str, total_m_em))
-total_m_em = [a + 'M' for a in total_m_em]
-
-unidades_emissoes = 'ton'
-unidades_energia = 'tep'
 
 
 def change_df(which_df, primaria_final):
@@ -166,7 +134,6 @@ def change_df(which_df, primaria_final):
     # return forma_df, sector_df, forma_anual, sector_anual, forma_sector_df
 
 
-
 def cria_cores(cores_5_7, select):
     if cores_5_7 == 5:
         color_dead = color_5_dead
@@ -178,7 +145,6 @@ def cria_cores(cores_5_7, select):
         color_live = color_7_live
         selec_list = forma_list
 
-
     colors = color_dead.copy()
     selecao_posi = selec_list.index(select)
     cor_viva = color_live[selecao_posi]
@@ -186,6 +152,33 @@ def cria_cores(cores_5_7, select):
 
     return colors
 
+
+energia_final_path = "data/energia_final.xlsx"
+energia_primaria_path = "data/energia_primaria.xlsx"
+emissoes_path = "data/emissoes_CO2.xlsx"
+
+
+forma_df_fi, sector_df_fi, forma_anual_fi, sector_anual_fi, forma_sector_df_fi, forma_list, sector_list, anos \
+    = cria_df(energia_final_path)
+
+forma_df_pr, sector_df_pr, forma_anual_pr, sector_anual_pr, forma_sector_df_pr, forma_list_pr, sector_list_pr, \
+    anos_pr = cria_df(energia_primaria_path)
+
+forma_df_em, sector_df_em, forma_anual_em, sector_anual_em, forma_sector_df_em, forma_list_em, sector_list_em, \
+    anos_em = cria_df(emissoes_path)
+
+# Total de energia em texto e milhões
+total_m_fi = list(round(forma_anual_fi['Total'] / 1000000, 1))
+total_m_fi = list(map(str, total_m_fi))
+total_m_fi = [a + 'M' for a in total_m_fi]
+
+total_m_pr = list(round(forma_anual_pr['Total'] / 1000000, 1))
+total_m_pr = list(map(str, total_m_pr))
+total_m_pr = [a + 'M' for a in total_m_pr]
+
+total_m_em = list(round(forma_anual_em['Total'] / 1000 / 1000000, 1))
+total_m_em = list(map(str, total_m_em))
+total_m_em = [a + 'M' for a in total_m_em]
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
@@ -196,7 +189,8 @@ app.scripts.config.serve_locally = True
 
 layout = dict(
     font=dict(
-        size=13
+        size=13,
+        family="'Abel', sans-serif",
     ),
     hovermode="closest",
     plot_bgcolor="#F9F9F9",
@@ -223,10 +217,13 @@ layout = dict(
 SIDEBAR_STYLE = {
     "background-color": "#f8f9fa",
     "padding": "10% 1%",
-    'height': '100%'
+    'height': '100%',
+    'font-family': layout['font']['family']
+}
+
+
 
     # 'padding-bottom': '99999px', 'margin-bottom': '-99999px'
-}
 #
 #
 # INSIDE_STYLE = {
@@ -237,13 +234,16 @@ SIDEBAR_STYLE = {
 #
 CONTENT_STYLE_1 = {
     "padding": "2%",
-    'height': '98%'
+    'height': '98%',
+    'font-family': layout['font']['family']
 
 }
 
 CONTENT_STYLE_2 = {
     "padding": "2%",
-    'height': '100%'
+    'height': '100%',
+    'font-family': layout['font']['family']
+
 }
 
 # cartao com butoes final/primaria
@@ -253,7 +253,7 @@ card_final_primaria = html.Div(
     [
         dbc.Row(
             [
-                dbc.Col(html.P("Forma de Energia:",
+                dbc.Col(html.P("Seleccione a forma de energia:",
                                ), width={"size": 6}),
 
                 dbc.Col(
@@ -262,7 +262,9 @@ card_final_primaria = html.Div(
                         options=[{'label': 'Primária', 'value': 'Primária'},
                                    {'label': 'Final', 'value': 'Final'}],
                         clearable=False,
-                        value='Final'
+                        value='Final',
+                        style= dict(font=layout['font'])
+
                     ), width=6
                 ),
             ],
@@ -278,7 +280,7 @@ card_forma_sector = html.Div(
         dbc.Row(
             [
                 dbc.Col(html.P(id='header-forma-sector',
-                               style={}), width={"size": 6}),
+                               ), width={"size": 6}),
 
                 dbc.Col(
                     dcc.Dropdown(
@@ -299,8 +301,9 @@ card_forma_sector = html.Div(
 # slider + grafico de barras
 year_selector = html.Div([
     html.Br(),
-
-    html.P(id='header-ano-bar', style={'textAlign': 'center', "padding": "0% 0% 10% 0%"}),
+# "<br>(Seleccione o ano pretendido)"
+    html.P(id='header-ano-bar', style={'textAlign': 'center', "padding": "0% 0% 0% 0%"}),
+    html.P("(Seleccione o ano pretendido)", style={'textAlign': 'center', "padding": "0% 0% 10% 0%", 'font-style': 'italic'}),
 
     dcc.Loading(id="loading-ano-bar", type="circle",
                 children=[
@@ -350,7 +353,7 @@ sidebar = html.Div(
 # Donut Container
 donut_container = html.Div([
 
-                    html.Div(
+                    dbc.Row(
                         [
                             html.Div([html.P(id='header-donut',
                                              style={"textAlign": "center", 'margin': 'auto', 'padding': '8px'}
@@ -361,7 +364,7 @@ donut_container = html.Div([
                         style={"textAlign": "center"}, className="pretty_container_2 row"
                     ),
 
-                    html.Div(
+                    dbc.Row(
                         [
                             html.Div([dcc.Loading(id="loading-donut", type="circle",
                                                   style={'margin-left': '0%', 'margin-top': '10%'},
@@ -369,14 +372,15 @@ donut_container = html.Div([
 
                                     # align="center"
                                      className="ten columns",
-                                     style={
-                                         "margin-left": "10%",
-                                     #     "margin-bottom": "0%",
-                                     #     "bottom": 0,
-                                         "padding": "1% 1% 15% 0%",
-                                     },
+                                     # style={
+                                     #     "margin-left": "10%",
+                                     # #     "margin-bottom": "0%",
+                                     # #     "bottom": 0,
+                                     #     "padding": "1% 1% 15% 0%",
+                                     # },
                                      )
                         ],
+                        justify='center'
                         # className="row"
                     )
 
@@ -477,7 +481,7 @@ app.layout = html.Div([
 
     dbc.Row(
         [
-            dbc.Col(sidebar, width=4),
+            dbc.Col(sidebar, width=4, style=dict(font=layout['font'])),
 
             dbc.Col([
 
@@ -497,9 +501,8 @@ app.layout = html.Div([
         justify="start"
 
     )
-
 ],
-    )
+)
 
 
 #
@@ -597,7 +600,7 @@ def headers_emissoes(at, prim_fin):
 
     else:
         head_a_b = 'Consumo total de Energia {} anual (tep)'.format(prim_fin)
-        return head_a_b, 'Consumo de Energia por:'
+        return head_a_b, 'Seleccione a desagragação pretendida:'
 
 
 @app.callback(
@@ -656,7 +659,9 @@ def update_ano_bar(ano, prim_fin, at):
         text=total_m,
         hovertext=my_text,
         hoverinfo='text',
-        textposition='outside'
+        textposition='outside',
+        hoverlabel=dict(font=dict(family=layout['font']['family'])),
+
 
     )])
 
@@ -814,15 +819,15 @@ def update_donut(ano, form_sect, selecao, at, dd_select, prim_fin):
 
     layout_donut['legend'] = go.layout.Legend(
 
-                            # x=-0.4,
-                            y=1.3,
+                            x=1.1,
+                            # y=-0.2,
                             traceorder="normal",
                             font=dict(
                                 size=13,
                                 color="black"
                             ),
                             bgcolor='rgba(0,0,0,0)',
-                            orientation='h'
+                            orientation='v'
                             )
     layout_donut['autosize'] = True
 
@@ -862,16 +867,18 @@ def update_donut(ano, form_sect, selecao, at, dd_select, prim_fin):
                     textinfo='percent',
                     hovertext=my_text_hover,
                     hoverinfo='text',
-                    hoverlabel=dict(font=dict(size=13)),
-                    opacity=0.8)])
+                    hoverlabel=dict(font=dict(size=13, family=layout['font']['family'])),
+                    opacity=0.8,
+                    sort=False)])
 
-    layout_donut['margin'] = dict(l=0, r=0, b=70, t=10)
+
+    layout_donut['margin'] = dict(l=0, r=0, b=20, t=10)
     # layout_donut['autosize'] = True
 
-    anot = [go.layout.Annotation(
-            text=select + '<br>' + str(df.loc[df.index == select, ano].item()) + ' | ' + unidade,
-        showarrow=False,
-        )]
+    # anot = [go.layout.Annotation(
+    #         text=select + '<br>' + str(df.loc[df.index == select, ano].item()) + ' | ' + unidade,
+    #     showarrow=False,
+    #     )]
 
     fig.update_layout(layout_donut)
     # fig.update_layout(annotations=anot)
@@ -1009,7 +1016,7 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
 
     else:
 
-        select_dd_text = "Seleccione a Forma de Energia:"
+        select_dd_text = "Seleccione o Tipo de Energia:"
         df = forma_df
 
         # title = "Consumo de Energia por forma de consumo"
@@ -1066,7 +1073,7 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
         text=my_text_show,
         hovertext=my_text_hover,
         hoverinfo='text',
-        hoverlabel=dict(font=dict(size=13)),
+        hoverlabel=dict(font=dict(size=13, family=layout['font']['family'])),
         textposition='auto'
 
     )])
@@ -1167,6 +1174,8 @@ def update_ano_line(ano, form_sect, prim_fin, at):
     layout_ano_line['hovermode'] = "x"
     layout_ano_line['margin'] = dict(l=20, r=20, b=20, t=20)
     layout_ano_line['height'] = 300
+    layout_ano_line['hoverlabel'] = dict(font=dict(family=layout['font']['family']))
+
     # layout_ano_line['title'] = dict(text=title, xref='paper', x=0.5)
 
     fig.update_layout(layout_ano_line)
