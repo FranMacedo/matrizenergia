@@ -1,4 +1,3 @@
-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -189,7 +188,7 @@ app.scripts.config.serve_locally = True
 
 layout = dict(
     font=dict(
-        size=13,
+        # size=13,
         family="'Abel', sans-serif",
     ),
     hovermode="closest",
@@ -253,7 +252,7 @@ card_final_primaria = html.Div(
     [
         dbc.Row(
             [
-                dbc.Col(html.P("Seleccione a forma de energia:",
+                dbc.Col(html.H6("Seleccione a forma de energia:",style={'font-style': 'italic'}
                                ), width={"size": 6}),
 
                 dbc.Col(
@@ -279,7 +278,7 @@ card_forma_sector = html.Div(
     [
         dbc.Row(
             [
-                dbc.Col(html.P(id='header-forma-sector',
+                dbc.Col(html.H6(id='header-forma-sector', style={'font-style': 'italic'}
                                ), width={"size": 6}),
 
                 dbc.Col(
@@ -302,8 +301,8 @@ card_forma_sector = html.Div(
 year_selector = html.Div([
     html.Br(),
 # "<br>(Seleccione o ano pretendido)"
-    html.P(id='header-ano-bar', style={'textAlign': 'center', "padding": "0% 0% 0% 0%"}),
-    html.P("(Seleccione o ano pretendido)", style={'textAlign': 'center', "padding": "0% 0% 10% 0%", 'font-style': 'italic'}),
+    html.H6(id='header-ano-bar', style={'textAlign': 'center', "padding": "0% 0% 0% 0%"}),
+    html.P("Seleccione o ano pretendido:", style={'textAlign': 'center', "padding": "0% 0% 10% 0%", 'font-style': 'italic'}),
 
     dcc.Loading(id="loading-ano-bar", type="circle",
                 children=[
@@ -330,11 +329,11 @@ sidebar = html.Div(
                              html.Hr(),
 
                              ], label="Energia", tab_id="tab-energia",
-                            tab_style={'width': '50%', 'textAlign': 'center'}),
+                            tab_style={'width': '50%', 'textAlign': 'center', 'font-size': '1.7rem'}),
 
                     dbc.Tab([html.Br()],
                             label="Emissões", tab_id="tab-emissoes",
-                            tab_style={'width': '50%', 'textAlign': 'center'}),
+                            tab_style={'width': '50%', 'textAlign': 'center', 'font-size': '1.7rem'}),
                 ],
                 id="tabs",
                 # card=True,
@@ -355,7 +354,7 @@ donut_container = html.Div([
 
                     dbc.Row(
                         [
-                            html.Div([html.P(id='header-donut',
+                            html.Div([html.H5(id='header-donut',
                                              style={"textAlign": "center", 'margin': 'auto', 'padding': '8px'}
                                              )
                                       ],
@@ -399,7 +398,7 @@ single_bar_container = html.Div([
                                 [
                                     dbc.Col([
 
-                                        html.P(id='text-bar',
+                                        html.H5(id='text-bar',
                                                style={"textAlign": "center", 'margin': 'auto', 'padding': '8px'}),
                                         ]),
 
@@ -414,7 +413,7 @@ single_bar_container = html.Div([
                     html.Div(
                         [
                             dbc.Row([
-                                dbc.Col(html.Div(id='select-dd-text'), width=5),
+                                dbc.Col(html.Div(id='select-dd-text'), width=5, style={'font-style': 'italic', 'textAlign': 'right', 'padding': '0% 2%'}),
                                 dbc.Col(
                                     dcc.Dropdown(
                                         id='dropdown-single',
@@ -422,7 +421,7 @@ single_bar_container = html.Div([
                                             ), width=4
                                 ),
                                 dbc.Col(html.Div(id='value-dd-text'), width=3,
-                                        style={'font-size': 13, 'font-weight': 'bold', "textAlign": "center"})
+                                        style={'font-weight': 'bold', "textAlign": "center"})
                             ],  no_gutters=True, justify='center', align="center"),
 
                             html.Hr(),
@@ -450,9 +449,9 @@ single_bar_container = html.Div([
 year_line_container = html.Div([
     html.Div(
         [
-            html.Div([html.P(id='header-ano-line',
-                             style={"textAlign": "center", 'margin': 'auto', 'padding': '8px'}
-                             )
+            html.Div([html.H5(id='header-ano-line',
+                              style={"textAlign": "center", 'margin': 'auto', 'padding': '8px'}
+                              )
                       ],
                      className="twelve columns")
         ],
@@ -488,7 +487,7 @@ app.layout = html.Div([
                 dbc.Row([
                     dbc.Col(donut_container, width=6),
                     dbc.Col(single_bar_container, width=6),
-                ], justify="start"),
+                    ], justify="start"),
 
                 dbc.Row([
                     dbc.Col(year_line_container, width=12)
@@ -819,15 +818,15 @@ def update_donut(ano, form_sect, selecao, at, dd_select, prim_fin):
 
     layout_donut['legend'] = go.layout.Legend(
 
-                            x=1.1,
+                            # x=1.1,
                             # y=-0.2,
                             traceorder="normal",
                             font=dict(
-                                size=13,
+                                # size=13,
                                 color="black"
                             ),
                             bgcolor='rgba(0,0,0,0)',
-                            orientation='v'
+                            orientation='h'
                             )
     layout_donut['autosize'] = True
 
@@ -867,7 +866,7 @@ def update_donut(ano, form_sect, selecao, at, dd_select, prim_fin):
                     textinfo='percent',
                     hovertext=my_text_hover,
                     hoverinfo='text',
-                    hoverlabel=dict(font=dict(size=13, family=layout['font']['family'])),
+                    hoverlabel=dict(font=dict(family=layout['font']['family'])),
                     opacity=0.8,
                     sort=False)])
 
@@ -1073,7 +1072,7 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
         text=my_text_show,
         hovertext=my_text_hover,
         hoverinfo='text',
-        hoverlabel=dict(font=dict(size=13, family=layout['font']['family'])),
+        hoverlabel=dict(font=dict(family=layout['font']['family'])),
         textposition='auto'
 
     )])
@@ -1163,12 +1162,12 @@ def update_ano_line(ano, form_sect, prim_fin, at):
         my_text = [trace + ': ' + '{:.0f}'.format(tr) + ' | ' + unidade for tr in list(df[trace])]
         fig.add_trace(go.Scatter(x=anos, y=df[trace], stackgroup='one', name=trace, fillcolor=color_fill[i],
                                  line_color=color_line[i], hovertext=my_text, hoverinfo="text",
-                                 hoverlabel=dict(bgcolor=color_fill[i],  font=dict(size=13))))
+                                 hoverlabel=dict(bgcolor=color_fill[i])))
         i += 1
 
     layout_ano_line['legend'] = go.layout.Legend(
                             font=dict(
-                                size=13,
+                                # size=13,
                                 color="black"
                             ))
     layout_ano_line['hovermode'] = "x"
