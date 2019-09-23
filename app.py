@@ -9,13 +9,18 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
 ctx = dash.callback_context
+ton_k = "k ton"
+ton_M = "M ton"
+tep_k = "k tep"
+tep_M = "M tep"
+
 
 color_7_live = ["#8DD3C7", "#fff069", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69"]
 color_7_dead = ["#d3ede9", "#FFF9C4", "#e3e1ed", "#f5d4d0", "#cee1ed", "#fae0c3", "#e7f2d3"]
 
 
-color_5_live = ["#f48b84", "#72afae", "#ffe0ae", "#ff6f69", "#96ceb4"]
-color_5_dead = ["#f5c0bc", "#b6e3e2", "#ffebc9", "#f5c1bf", "#d1e8dd"]
+color_5_live = ["#8DD3C7", "#fff069", "#BEBADA", "#FB8072", "#80B1D3"]
+color_5_dead = ["#d3ede9", "#FFF9C4", "#e3e1ed", "#f5d4d0", "#cee1ed"]
 
 color_7_live_d = {"Diesel": color_7_live[0],
                     "Electricidade": color_7_live[1],
@@ -116,11 +121,11 @@ def cria_df(file_path):
 
 def change_df(which_df, primaria_final):
     if primaria_final == 'primaria':
-        forma_df, sector_df, forma_anual, sector_anual, forma_sector_df = forma_df_fi, sector_df_fi, forma_anual_fi, \
-                                                                          sector_anual_fi, forma_sector_df_fi
-    else:
         forma_df, sector_df, forma_anual, sector_anual, forma_sector_df = forma_df_pr, sector_df_pr, forma_anual_pr, \
                                                                           sector_anual_pr, forma_sector_df_pr
+    else:
+        forma_df, sector_df, forma_anual, sector_anual, forma_sector_df = forma_df_fi, sector_df_fi, forma_anual_fi, \
+                                                                          sector_anual_fi, forma_sector_df_fi
 
     return {
         "forma_df": forma_df,
@@ -177,7 +182,7 @@ total_m_pr = [a + 'M' for a in total_m_pr]
 
 total_m_em = list(round(forma_anual_em['Total'] / 1000 / 1000000, 1))
 total_m_em = list(map(str, total_m_em))
-total_m_em = [a + 'M' for a in total_m_em]
+total_m_em = [a + ' kM' for a in total_m_em]
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
@@ -299,9 +304,8 @@ card_forma_sector = html.Div(
 
 # slider + grafico de barras
 year_selector = html.Div([
-    html.Br(),
 # "<br>(Seleccione o ano pretendido)"
-    html.H6(id='header-ano-bar', style={'textAlign': 'center', "padding": "0% 0% 0% 0%"}),
+    html.H5(id='header-ano-bar', style={'textAlign': 'center', "padding": "0% 0% 0% 0%"}),
     html.P("Seleccione o ano pretendido:", style={'textAlign': 'center', "padding": "0% 0% 10% 0%", 'font-style': 'italic'}),
 
     dcc.Loading(id="loading-ano-bar", type="circle",
@@ -367,7 +371,7 @@ donut_container = html.Div([
                         [
                             html.Div([dcc.Loading(id="loading-donut", type="circle",
                                                   style={'margin-left': '0%', 'margin-top': '10%'},
-                                                  children=[dcc.Graph(id="donut-graph", config={'displayModeBar': False})])],
+                                                  children=[dcc.Graph(id="donut-graph", config={'displayModeBar': False}, style={'margin-bottom': '4%'})])],
 
                                     # align="center"
                                      className="ten columns",
@@ -623,21 +627,21 @@ def update_ano_bar(ano, prim_fin, at):
 
 
 
-
     if at == "tab-emissoes":
 
-        forma_anual = forma_anual_em
+        forma_anual = forma_anual_em/1000000
         total_m = total_m_em
-        unidade = unidades_emissoes
+        # unidade = unidades_emissoes
+        unidade = ton_M
 
     else:
-        unidade = unidades_energia
+        unidade = tep_k
 
         if prim_fin == 'Primária':
-            forma_anual = change_df('forma_anual', 'primaria')
+            forma_anual = change_df('forma_anual', 'primaria')/1000
             total_m = total_m_pr
         else:
-            forma_anual = change_df('forma_anual', 'final')
+            forma_anual = change_df('forma_anual', 'final')/1000
             total_m = total_m_fi
 
 
@@ -648,7 +652,7 @@ def update_ano_bar(ano, prim_fin, at):
     color_fill[ano_posi] = '#029CDE'
     color_line = ['#029CDE', ]*len(forma_anual.index)
 
-    my_text = ['Total: ' + '{:.0f}'.format(tr) + ' | ' + unidade + '<br>Ano: ' + '{}'.format(an)
+    my_text = ['Total: ' + '{:.0f}'.format(tr) + unidade + '<br>Ano: ' + '{}'.format(an)
                for tr, an in zip(list(forma_anual['Total']), anos)]
     fig = go.Figure(data=[go.Bar(
         x=forma_anual.index,
@@ -726,19 +730,19 @@ def header_donut_ano_line(ano, at, prim_fin, form_sect):
     Output("donut-graph", "figure"),
     [Input("year-selected", "value"),
      Input('dd-forma-sector', 'value'),
-     Input('donut-graph', 'clickData'),
+     # Input('donut-graph', 'clickData'),
      Input('tabs', 'active_tab'),
-     Input('dropdown-single', 'value'),
+     # Input('dropdown-single', 'value'),
      Input('dd-primaria-final', 'value'),
      ]
 )
-def update_donut(ano, form_sect, selecao, at, dd_select, prim_fin):
+def update_donut(ano, form_sect, at, prim_fin):
 
     if not ctx.triggered:
         raise PreventUpdate
 
-    trigger = ctx.triggered[0]['prop_id'].split('.')[0]
-    trigger_value = ctx.triggered[0]['value']
+    # trigger = ctx.triggered[0]['prop_id'].split('.')[0]
+    # trigger_value = ctx.triggered[0]['value']
 
 
     layout_donut = copy.deepcopy(layout)
@@ -747,9 +751,12 @@ def update_donut(ano, form_sect, selecao, at, dd_select, prim_fin):
     if at == "tab-emissoes":
         forma_anual = forma_anual_em / 1000
         sector_anual = sector_anual_em / 1000
-        unidade = unidades_emissoes
+        unidade_1 = ton_M
+        unidade_2 = ton_k
+
     else:
-        unidade = unidades_energia
+        unidade_1 = tep_k
+        unidade_2 = unidades_energia
 
         if prim_fin == 'Primária':
             sector_anual = change_df('sector_anual', 'primaria')
@@ -765,28 +772,28 @@ def update_donut(ano, form_sect, selecao, at, dd_select, prim_fin):
         color_live = color_5_live_d
         color_dead = color_5_dead_d
         df = sector_anual
+        select = 'Transportes'
+        # if dd_select:
+        #
+        #     if dd_select in sector_list:
+        #         select = dd_select
+        #
+        #     else:
+        #         select = 'Transportes'
 
-        if dd_select:
 
-            if dd_select in sector_list:
-                select = dd_select
-
-            else:
-                select = 'Transportes'
-
-
-        elif selecao:
-
-            select_1 = selecao['points'][0]['label']
-            if select_1 in sector_list:
-
-                select = select_1
-
-            else:
-                select = 'Transportes'
-
-        else:
-            select = 'Transportes'
+        # elif selecao:
+        #
+        #     select_1 = selecao['points'][0]['label']
+        #     if select_1 in sector_list:
+        #
+        #         select = select_1
+        #
+        #     else:
+        #         select = 'Transportes'
+        #
+        # else:
+        #     select = 'Transportes'
 
     # seleciona Forma
     else:
@@ -795,25 +802,27 @@ def update_donut(ano, form_sect, selecao, at, dd_select, prim_fin):
         df = forma_anual.iloc[:, :-1]
         color_live = color_7_live_d
         color_dead = color_7_dead_d
+        select = 'Electricidade'
 
-        if dd_select:
 
-            if dd_select in forma_list:
-                select = dd_select
-            else:
-                select = 'Electricidade'
+        # if dd_select:
+        #
+        #     if dd_select in forma_list:
+        #         select = dd_select
+        #     else:
+        #         select = 'Electricidade'
+        #
+        # elif selecao:
+        #
+        #     select_1 = selecao['points'][0]['label']
+        #
+        #     if select_1 in forma_list:
+        #         select = select_1
+        #     else:
+        #         select = 'Electricidade'
 
-        elif selecao:
-
-            select_1 = selecao['points'][0]['label']
-
-            if select_1 in forma_list:
-                select = select_1
-            else:
-                select = 'Electricidade'
-
-        else:
-            select = 'Electricidade'
+        # else:
+        #     select = 'Electricidade'
 
 
     layout_donut['legend'] = go.layout.Legend(
@@ -847,21 +856,28 @@ def update_donut(ano, form_sect, selecao, at, dd_select, prim_fin):
     #     df.loc[(df.index == c), 'color_fill'] = color_dead[c]
     #     df.loc[(df.index == c), 'color_line'] = color_live[c]
 
-    df.loc[(df.index == select), 'color_fill'] = color_live[select]
+    # df.loc[(df.index == select), 'color_fill'] = color_live[select]
 
 
     df = df[(df != 0).all(1)]
     df = df.drop(['labels'], axis=1)
+    values = list(df[ano]/1000)
+    unidades = [unidade_1]*len(values)
+    for a in list(df[ano]/1000):
+        if round(a,0) == 0:
+            index_pos = values.index(a)
+            values[index_pos] = values[index_pos]*1000
+            unidades[index_pos] = " " + unidade_2
 
-    my_text_hover = [fs + ': ' + '{:.0f}'.format(sel) + ' | ' + unidade + '<br>Ano: ' + '{}'.format(ano)
-                     for fs, sel in zip(df.index.tolist(), list(df[ano]))]
+    my_text_hover = [fs + ': ' + '{:.0f}'.format(sel) + un + '<br>Ano: ' + '{}'.format(ano)
+                     for fs, sel,un in zip(df.index.tolist(), values, unidades)]
 
-    my_text_write = [fs + ': ' + '{:.0f}'.format(sel) + ' | ' + unidade + '<br>Ano: ' + '{}'.format(ano)
-                     for fs, sel in zip(df.index.tolist(), list(df[ano]))]
+    # my_text_write = [fs + ': ' + '{:.0f}'.format(sel) + ' | ' + unidade + '<br>Ano: ' + '{}'.format(ano)
+    #                  for fs, sel in zip(df.index.tolist(), list(df[ano]))]
 
     fig = go.Figure(data=[go.Pie(labels=df.index.tolist(),
                     values=df[ano].tolist(),
-                    hole=0.3,
+                    hole=0.6,
                     marker=dict(colors=df['color_fill'], line=dict(color=df['color_line'], width=2)),
                     textinfo='percent',
                     hovertext=my_text_hover,
@@ -871,7 +887,7 @@ def update_donut(ano, form_sect, selecao, at, dd_select, prim_fin):
                     sort=False)])
 
 
-    layout_donut['margin'] = dict(l=0, r=0, b=20, t=10)
+    layout_donut['margin'] = dict(l=5, r=10, b=20, t=20)
     # layout_donut['autosize'] = True
 
     # anot = [go.layout.Annotation(
@@ -950,13 +966,17 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
     if not dash.callback_context.triggered:
         raise PreventUpdate
 
+
     if at == "tab-emissoes":
         sector_df = sector_df_em
         forma_df = forma_df_em
-        unidade = unidades_emissoes
+        unidade_1 = ton_M
+        unidade_2 = ton_k
+
     else:
 
-        unidade = unidades_energia
+        unidade_1 = tep_k
+        unidade_2 = " " + unidades_energia
 
         if prim_fin == 'Primária':
             sector_df = change_df('sector_df', 'primaria')
@@ -1040,9 +1060,17 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
 
         if at == "tab-emissoes":
             title_1 = "Emissões de CO2 geradas no Consumo de"
+            if select == "Outros":
+                title_1 = "Emissões de CO2 geradas noutros Consumos"
         else:
             title_1 = "Consumo de "
-        title = title_1 + " " + select + ", por Sector de Consumo, em " + str(ano)
+            if select == "Outros":
+                title_1 = "Outros Consumos"
+
+        if select == "Outros":
+            title = title_1 + ", por Sector de Consumo, em " + str(ano)
+        else:
+            title = title_1 + " " + select + ", por Sector de Consumo, em " + str(ano)
 
 
 
@@ -1052,12 +1080,44 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
 
 
     df = df[(df != 0).all(1)]
-    df = df.sort_values(forma_sector)
+    df = df.sort_values(select)
     df['Percentagem'] = df[select]/(df[select].sum())*100
 
-    my_text_hover = [fs + '<br>' + '{:.0f}'.format(sel) + ' | ' + unidade + '<br>' + '{:.2f}'.format(pr)
+    if at == "tab-emissoes":
+        values = list(df[select]/1000000)
+        if int(round(df[select].sum() / 1000000, 0)) == 0:
+            valor_total = int(round(df[select].sum() / 1000, 0))
+            unidade_vt = unidade_2
+
+        else:
+            valor_total = int(round(df[select].sum() / 1000000, 0))
+            unidade_vt = unidade_1
+
+    else:
+        values = list(df[select]/1000)
+        if int(round(df[select].sum() / 1000, 0)) == 0:
+            valor_total = int(round(df[select].sum(), 0))
+            unidade_vt = unidade_2
+
+        else:
+            valor_total = int(round(df[select].sum() / 1000, 0))
+            unidade_vt = unidade_1
+
+
+
+    unidades = [unidade_1] * len(values)
+    for a in values:
+        index_pos = values.index(a)
+        if a < 1:
+            values[index_pos] = values[index_pos] * 1000
+            unidades[index_pos] = unidade_2
+
+
+
+
+    my_text_hover = [fs + '<br>' + '{:.0f}'.format(sel) + un + '<br>' + '{:.2f}'.format(pr)
                      + '%' + '<br>Ano: ' + '{}'.format(ano)
-                     for fs, sel, pr in zip(list(df[forma_sector]), list(df[select]), list(df['Percentagem']))]
+                     for fs, sel,un, pr in zip(list(df[forma_sector]), values, unidades, list(df['Percentagem']))]
 
     my_text_show = ['{:.0f}'.format(pr) + '%' for pr in list(df['Percentagem'])]
 
@@ -1083,9 +1143,8 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
     #layout_bar_single['title'] = dict(text=select, font=dict(size=13), xref='paper', x=0.3)
 
     fig.update_layout(layout_bar_single)
-    valor_total = str(int(round(df[select].sum(),0)))
 
-    value = "                         " + valor_total + " " + unidade
+    value = "                         " + str(valor_total) + unidade_vt
 
     return value, select_dd_text, title, style, fig
 
@@ -1107,7 +1166,12 @@ def update_ano_line(ano, form_sect, prim_fin, at):
         forma_anual = forma_anual_em
         unidade = unidades_emissoes
         title_1 = "Emissões de CO2 anuais, por "
+        unidade_1 = ton_M
+        unidade_2 = ton_k
+
     else:
+        unidade_1 = tep_k
+        unidade_2 = " " + unidades_energia
         unidade = unidades_energia
         title_1 = "Consumo de Energia {} anual, por ".format(prim_fin)
 
@@ -1158,8 +1222,21 @@ def update_ano_line(ano, form_sect, prim_fin, at):
     i = 0
     title = title_1 + title_2
 
+
     for trace in df.sum().sort_values().index:
-        my_text = [trace + ': ' + '{:.0f}'.format(tr) + ' | ' + unidade for tr in list(df[trace])]
+        if at == "tab-emissoes":
+            values = list(df[trace] / 1000000)
+        else:
+            values = list(df[trace]/1000)
+
+        unidades = [unidade_1] * len(values)
+        for a in values:
+            index_pos = values.index(a)
+            if a < 1:
+                values[index_pos] = values[index_pos] * 1000
+                unidades[index_pos] = unidade_2
+
+        my_text = [trace + ': ' + '{:.0f}'.format(tr) + un for tr, un in zip(values, unidades)]
         fig.add_trace(go.Scatter(x=anos, y=df[trace], stackgroup='one', name=trace, fillcolor=color_fill[i],
                                  line_color=color_line[i], hovertext=my_text, hoverinfo="text",
                                  hoverlabel=dict(bgcolor=color_fill[i])))
