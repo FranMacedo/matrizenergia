@@ -1335,7 +1335,7 @@ def update_ano_line(ano, form_sect, prim_fin, at):
                                 color="black"
                             ))
     layout_ano_line['hovermode'] = "x"
-    layout_ano_line['margin'] = dict(l=20, r=20, b=20, t=20)
+    layout_ano_line['margin'] = dict(l=20, r=150, b=20, t=20)
     layout_ano_line['height'] = 300
     layout_ano_line['hoverlabel'] = dict(font=dict(family=layout['font']['family']))
 
