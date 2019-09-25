@@ -7,6 +7,7 @@ from dash.dependencies import Input, Output
 import copy
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
+from flask import send_from_directory
 
 ctx = dash.callback_context
 ton_k = "k ton"
@@ -184,7 +185,8 @@ total_m_em = list(round(forma_anual_em['Total'] / 1000 / 1000000, 1))
 total_m_em = list(map(str, total_m_em))
 total_m_em = [a + ' kM' for a in total_m_em]
 
-external_stylesheets = [dbc.themes.BOOTSTRAP]
+FONT_AWESOME = "https://use.fontawesome.com/releases/v5.10.2/css/all.css"
+external_stylesheets = [dbc.themes.BOOTSTRAP, FONT_AWESOME]
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
@@ -222,7 +224,8 @@ SIDEBAR_STYLE = {
     "background-color": "#f8f9fa",
     "padding": "10% 1%",
     'height': '100%',
-    'font-family': layout['font']['family']
+    'font-family': layout['font']['family'],
+    'margin-bottom': '0'
 }
 
 
@@ -250,9 +253,9 @@ CONTENT_STYLE_2 = {
 
 }
 
+
+
 # cartao com butoes final/primaria
-
-
 card_final_primaria = html.Div(
     [
         dbc.Row(
@@ -261,15 +264,17 @@ card_final_primaria = html.Div(
                                ), width={"size": 6}),
 
                 dbc.Col(
-                    dcc.Dropdown(
-                        id='dd-primaria-final',
-                        options=[{'label': 'Primária', 'value': 'Primária'},
-                                   {'label': 'Final', 'value': 'Final'}],
-                        clearable=False,
-                        value='Final',
-                        style= dict(font=layout['font'])
+                    dbc.Row(
+                        [dcc.Dropdown(
+                            id='dd-primaria-final',
+                            options=[{'label': 'Primária', 'value': 'Primária'},
+                                       {'label': 'Final', 'value': 'Final'}],
+                            clearable=False,
+                            value='Final',
+                            style= dict(font=layout['font'], width='80%')
 
-                    ), width=6
+                        )], align='center', justify='center'),
+                    width=6, align='center'
                 ),
             ],
             align="center", justify='center'
@@ -318,8 +323,58 @@ year_selector = html.Div([
              )
         ])
 
+download_button_em = html.Div(
+    [
+    html.A(
+        children=html.I(
+            className="fas fa-file-download fa-lg",
+            id="target-em",
+        ),
+        href='/download/Emissoes_CO2_Lisboa.xlsx',
+        id='link-file-em'
+    ),
+    dbc.Tooltip(
+        'Download das emissões de CO2 geradas em Lisboa, por sector e por forma de energia (.xlsx).',
+        target="target-em", style={'font-size': '1.4rem'}, id='tooltip-em'),
+        ],
+    className="p-3 text-muted", style={'textAlign': 'center'})
 
-# Barra lateral, que engloba todas as componentes geradas em cima
+
+
+download_button_p = html.Div(
+    [
+    html.A(
+        children=html.I(
+            className="fas fa-file-download fa-lg",
+            id="target-p",
+        ),
+        href='/download/Energia_Primaria_Lisboa.xlsx',
+        id='link-file-p'
+    ),
+    dbc.Tooltip(
+'Download dos consumos de energia primária, por sector e por forma de energia (.xlsx).',
+        target="target-p", style={'font-size': '1.4rem'}, id='tooltip-p'),
+        ],
+    className="p-3 text-muted")
+
+download_button_f = html.Div(
+    [
+    html.A(
+        children=html.I(
+            className="fas fa-file-download fa-lg",
+            id="target-f",
+        ),
+        href='/download/Energia_Final_Lisboa.xlsx',
+        id='link-file-f'
+    ),
+    dbc.Tooltip(
+        'Download dos consumos de energia final, por sector e por forma de energia (.xlsx).',
+        target="target-f", style={'font-size': '1.4rem'}, id='tooltip-f'),
+        ],
+    className="p-3 text-muted")
+
+
+
 sidebar = html.Div(
     [
         # html.H3("Matriz de Energia", className="display-6"),
@@ -346,12 +401,30 @@ sidebar = html.Div(
 
         html.Div([card_forma_sector], style={"padding": "0% 10% 0% 10%"}),
         html.Hr(),
-        year_selector
+        year_selector,
+        html.Hr(),
+        dbc.Row(html.H5('DOWNLOADS:', style={'font-weight': 'bold', "textAlign": "center"}), align='center', justify='center'),
+        # html.Hr(),
+        html.Div(dbc.Row([html.P('Emissões de CO2:', style={'textAlign': 'center'}), download_button_em], align='center', justify='center'), id="down-em-container", style={'display': 'none'}),
+        html.Div(
+            [
+            dbc.Row([html.P('Energia Final:', style={'textAlign': 'center'}), download_button_f], align='center', justify='center'),
+            dbc.Row([html.P('Energia Primária:', style={'textAlign': 'center'}), download_button_p], align='center', justify='center'),
+            ],
+            id="down-pf-container")
+
     ],
     style=SIDEBAR_STYLE,
     className="pretty_container",
 )
-
+down_but = dbc.Button(
+    "DOWNLOADS",
+    id="dwn",
+    size="lg",
+    # className="mb-3",
+    # outline=True,
+    color="link",
+)
 
 # Donut Container
 donut_container = html.Div([
@@ -572,7 +645,10 @@ app.layout = html.Div([
 #     else:
 #         return False, True
 
-
+@server.route("/download/<path:path>")
+def download(path):
+    """Serve a file from the upload directory."""
+    return send_from_directory("data", path, as_attachment=True)
 @app.callback(
     Output("year-selected", "value"),
     [Input("ano-bar-graph", "clickData")])
@@ -585,8 +661,6 @@ def update_year_slider(ano_bar_graph_selected):
     else:
         return ano_bar_graph_selected['points'][0]['x']
 
-
-# 'Consumo total de Energia por ano (tep)')
 
 
 @app.callback([Output('header-ano-bar', 'children'),
@@ -607,9 +681,11 @@ def headers_emissoes(at, prim_fin):
 
 
 @app.callback(
-
+    [
+    Output('down-pf-container', 'style'),
+    Output('down-em-container', 'style'),
     Output("ano-bar-graph", "figure"),
-
+    ],
     [Input("year-selected", "value"),
      Input('dd-primaria-final', 'value'),
      Input('tabs', 'active_tab'),
@@ -628,21 +704,32 @@ def update_ano_bar(ano, prim_fin, at):
 
 
     if at == "tab-emissoes":
+        visi_em = {'display': 'inline'}
+        visi_pf = {'display': 'none'}
 
         forma_anual = forma_anual_em/1000000
         total_m = total_m_em
         # unidade = unidades_emissoes
         unidade = ton_M
 
+
+
     else:
         unidade = tep_k
+        visi_em = {'display': 'none'}
+        visi_pf = {'display': 'inline'}
 
         if prim_fin == 'Primária':
             forma_anual = change_df('forma_anual', 'primaria')/1000
             total_m = total_m_pr
+
         else:
             forma_anual = change_df('forma_anual', 'final')/1000
             total_m = total_m_fi
+
+
+
+
 
 
     layout_ano_bar = copy.deepcopy(layout)
@@ -678,7 +765,7 @@ def update_ano_bar(ano, prim_fin, at):
     fig.update_xaxes(fixedrange=True)
 
     # fig.update_yaxes()
-    return fig
+    return visi_pf, visi_em, fig
 
 
 @app.callback([Output('header-ano-line', 'children'),
