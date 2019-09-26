@@ -982,7 +982,7 @@ def update_donut(ano, form_sect, at, prim_fin):
                     sort=False)])
 
 
-    layout_donut['margin'] = dict(l=15, r=35, b=20, t=20)
+    layout_donut['margin'] = dict(l=20, r=35, b=20, t=20)
     # layout_donut['autosize'] = True
 
     # anot = [go.layout.Annotation(
