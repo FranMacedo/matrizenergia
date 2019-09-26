@@ -264,16 +264,16 @@ card_final_primaria = html.Div(
                                ), width={"size": 6}),
 
                 dbc.Col(
-                    dbc.Row(
-                        [dcc.Dropdown(
+
+                        dcc.Dropdown(
                             id='dd-primaria-final',
                             options=[{'label': 'Primária', 'value': 'Primária'},
                                        {'label': 'Final', 'value': 'Final'}],
                             clearable=False,
                             value='Final',
-                            style= dict(font=layout['font'], width='80%')
+                            style= dict(font=layout['font'])
 
-                        )], align='center', justify='center'),
+                        ),
                     width=6, align='center'
                 ),
             ],
@@ -956,8 +956,15 @@ def update_donut(ano, form_sect, at, prim_fin):
             values[index_pos] = values[index_pos]*1000
             unidades[index_pos] = " " + unidade_2
 
+    percentagens = ((df[ano]/sum(df[ano].tolist()))*100).tolist()
+
+    percentagens = [round(p) if p > 1 else round(p, 2) for p in percentagens]
+
     my_text_hover = [fs + ': ' + '{:.0f}'.format(sel) + un + '<br>Ano: ' + '{}'.format(ano)
                      for fs, sel,un in zip(df.index.tolist(), values, unidades)]
+
+    my_text_write = ['{}'.format(p) + '%'
+                     for p in percentagens]
 
     # my_text_write = [fs + ': ' + '{:.0f}'.format(sel) + ' | ' + unidade + '<br>Ano: ' + '{}'.format(ano)
     #                  for fs, sel in zip(df.index.tolist(), list(df[ano]))]
@@ -966,7 +973,8 @@ def update_donut(ano, form_sect, at, prim_fin):
                     values=df[ano].tolist(),
                     hole=0.6,
                     marker=dict(colors=df['color_fill'], line=dict(color=df['color_line'], width=2)),
-                    textinfo='percent',
+                    text=my_text_write,
+                    textinfo='text',
                     hovertext=my_text_hover,
                     hoverinfo='text',
                     hoverlabel=dict(font=dict(family=layout['font']['family'])),
@@ -974,7 +982,7 @@ def update_donut(ano, form_sect, at, prim_fin):
                     sort=False)])
 
 
-    layout_donut['margin'] = dict(l=5, r=10, b=20, t=20)
+    layout_donut['margin'] = dict(l=15, r=35, b=20, t=20)
     # layout_donut['autosize'] = True
 
     # anot = [go.layout.Annotation(
