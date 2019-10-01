@@ -8,7 +8,6 @@ import copy
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 from flask import send_from_directory
-import openpyxl
 from flask_sqlalchemy import SQLAlchemy
 
 
