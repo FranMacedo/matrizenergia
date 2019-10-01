@@ -714,7 +714,7 @@ app.layout = html.Div([
     ),
     dbc.Modal(
         [
-            dbc.ModalHeader("DOWNLOAD DE FICHEIROS - {}".format("aaa")),
+            dbc.ModalHeader(id='header-modal'),
             dbc.ModalBody(["Qual o propósito deste download?",
                            dcc.RadioItems(
                                options=[
@@ -821,7 +821,10 @@ def regista_target(np, nf, ne):
 
 
 @app.callback(
+    [
+    Output('header-modal', 'children'),
     Output('file-link', 'href'),
+    ],
     [
         Input('target-p', "n_clicks"),
         Input('target-f', "n_clicks"),
@@ -833,13 +836,13 @@ def update_link(np, nf, ne):
         raise PreventUpdate
 
     if ctx.triggered[0]['prop_id'] == 'target-p.n_clicks':
-        return '/download/Energia_Primaria_Lisboa.xlsx'
+        return "DOWNLOAD DE FICHEIROS - Energia Primária",'/download/Energia_Primaria_Lisboa.xlsx'
 
     elif ctx.triggered[0]['prop_id'] == 'target-f.n_clicks':
-        return '/download/Energia_Final_Lisboa.xlsx'
+        return "DOWNLOAD DE FICHEIROS - Energia Final", '/download/Energia_Final_Lisboa.xlsx'
 
     elif ctx.triggered[0]['prop_id'] == 'target-em.n_clicks':
-        return '/download/Emissoes_CO2_Lisboa.xlsx'
+        return "DOWNLOAD DE FICHEIROS - Emissões de CO2", '/download/Emissoes_CO2_Lisboa.xlsx'
     else:
         return 'javascript:void(0);'
 
