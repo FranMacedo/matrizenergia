@@ -3,11 +3,14 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import plotly.graph_objs as go
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import copy
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 from flask import send_from_directory
+import openpyxl
+from flask_sqlalchemy import SQLAlchemy
+
 
 ctx = dash.callback_context
 ton_k = "k ton"
@@ -53,6 +56,7 @@ color_5_dead_d = {"Agricultura": color_5_dead[0],
 
 unidades_emissoes = 'ton'
 unidades_energia = 'tep'
+
 
 
 def cria_df(file_path):
@@ -192,6 +196,22 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 app.css.config.serve_locally = True
 app.scripts.config.serve_locally = True
+app.server.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///site.db'
+app.server.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app.server)
+
+class Pessoas(db.Model):
+    __tablename__ = "registo"
+    id = db.Column(db.Integer, primary_key=True)
+    primaria = db.Column(db.String(20))
+    final = db.Column(db.String(20))
+    emissoes = db.Column(db.String(20))
+
+    def __repr__(self):
+        return f"pessoas('{self.primaria}', '{self.final}', '{self.emissoes}')"
+
+
 
 layout = dict(
     font=dict(
@@ -254,13 +274,129 @@ CONTENT_STYLE_2 = {
 }
 
 
+#
+# nomes = ['primaria', 'final', 'emissoes']
+# headers = ['Energia Primária', 'Energia Final', 'Emissões de CO2']
+# id_m = ['modal-p', 'modal-f', 'modal-em']
+# id_l = ['link-file-p', 'link-file-f', 'link-file-em']
+# id_c = ['close-p', 'close-f', 'close-em']
+# id_d = ['download-p', 'download-f', 'download-em']
+# id_r = ['radio-p', 'radio-f', 'radio-em']
+# id_t = ['target-p', 'target-f', 'target-em']
+# links = ['/download/Energia_Primaria_Lisboa.xlsx', '/download/Energia_Final_Lisboa.xlsx', '/download/Emissoes_CO2_Lisboa.xlsx']
+# divs = ['hidden-p', 'hidden-f', 'hidden-em']
+#
+# ids_modal = {nom : {
+#     'header': h,
+#     'id_m': m,
+#     'id_l': l,
+#     'id_c': c,
+#     'id_d': d,
+#     'id_r': r,
+#     'id_t': t,
+#     'link': l2,
+#     'div':div
+#
+# } for nom, h, m, l, c, d, r, t, l2, div in zip(nomes, headers, id_m, id_l, id_c, id_d, id_r, id_t, links, divs)}
+#
+#
+#
+# def create_modal(tab):
+#     header = ids_modal[tab]['header']
+#     id_m = ids_modal[tab]['id_m']
+#     id_l = ids_modal[tab]['id_l']
+#     id_c = ids_modal[tab]['id_c']
+#     id_d = ids_modal[tab]['id_d']
+#     id_r = ids_modal[tab]['id_r']
+#     link = ids_modal[tab]['link']
+#     div = ids_modal[tab]['div']
+#     return html.Div(
+#         [
+#             dbc.Modal(
+#                 [
+#                     dbc.ModalHeader("DOWNLOAD DE FICHEIROS - {}".format(header)),
+#                     dbc.ModalBody(["Qual o propósito deste download?",
+#                                    dcc.RadioItems(
+#                                        options=[
+#                                            {"label": "Pessoal", "value": 1},
+#                                            {"label": "Profissional", "value": 2},
+#                                            {"label": "Académico", "value": 3},
+#                                        ],
+#                                        # value=1,
+#                                        id=id_r,
+#                                    ),
+#                                    html.Div(id=div, style={'display': 'none'})
+#
+#                                    ]),
+#
+#                     dbc.ModalFooter(
+#
+#                         [
+#                             html.A(
+#                                 children=dbc.Button("Download", id=id_d, className="ml-auto", color="primary",size="lg",
+#                                                     disabled=True),
+#                                 href = link,
+#                                 id=id_l
+#                             ),
+#                             dbc.Button(
+#                                 "Close", id=id_c, className="m1-auto",size="lg", color="danger"
+#                             )]
+#                     ),
+#                 ],
+#                 id=id_m,
+#                 centered=True,
+#                 style={'font-family': layout['font']['family']}
+#             ),
+#         ], style={'font-family': layout['font']['family']},
+#     )
+#
+#
+# modal_p = create_modal('primaria')
+# modal_f = create_modal('final')
+# modal_em = create_modal('emissoes')
+
+# modal = dbc.Modal(
+#     [
+#         dbc.ModalHeader("DOWNLOAD DE FICHEIROS - {}".format("aaa")),
+#         dbc.ModalBody(["Qual o propósito deste download?",
+#                        dcc.RadioItems(
+#                            options=[
+#                                {"label": "Pessoal", "value": 1},
+#                                {"label": "Profissional", "value": 2},
+#                                {"label": "Académico", "value": 3},
+#                            ],
+#                            # value=1,
+#                            id="radio-modal",
+#                        ),
+#                        html.Div(id="hidden", style={'display': 'none'})
+#
+#                        ]),
+#
+#         dbc.ModalFooter(
+#
+#             [
+#                 html.A(
+#                     children=dbc.Button("Download", id='download-file', className="ml-auto", color="primary", size="lg",
+#                                         disabled=True),
+#                     # href=link,
+#                     id='file-link'
+#                 ),
+#                 dbc.Button(
+#                     "Close", id='cancel', className="m1-auto", size="lg", color="danger"
+#                 )]
+#         ),
+#     ],
+#     id='modal',
+#     centered=True,
+#     style={'font-family': layout['font']['family']}
+# ),
 
 # cartao com butoes final/primaria
 card_final_primaria = html.Div(
     [
         dbc.Row(
             [
-                dbc.Col(html.H6("Seleccione a forma de energia:",style={'font-style': 'italic'}
+                dbc.Col(html.H6("Seleccione a forma de energia:", style={'font-style': 'italic'}
                                ), width={"size": 6}),
 
                 dbc.Col(
@@ -330,7 +466,7 @@ download_button_em = html.Div(
             className="fas fa-file-download fa-lg",
             id="target-em",
         ),
-        href='/download/Emissoes_CO2_Lisboa.xlsx',
+        href='javascript:void(0);',
         id='link-file-em'
     ),
     dbc.Tooltip(
@@ -348,7 +484,7 @@ download_button_p = html.Div(
             className="fas fa-file-download fa-lg",
             id="target-p",
         ),
-        href='/download/Energia_Primaria_Lisboa.xlsx',
+        href='javascript:void(0);',
         id='link-file-p'
     ),
     dbc.Tooltip(
@@ -364,7 +500,7 @@ download_button_f = html.Div(
             className="fas fa-file-download fa-lg",
             id="target-f",
         ),
-        href='/download/Energia_Final_Lisboa.xlsx',
+        href='javascript:void(0);',
         id='link-file-f'
     ),
     dbc.Tooltip(
@@ -576,13 +712,181 @@ app.layout = html.Div([
         ],
         justify="start"
 
-    )
+    ),
+    dbc.Modal(
+        [
+            dbc.ModalHeader("DOWNLOAD DE FICHEIROS - {}".format("aaa")),
+            dbc.ModalBody(["Qual o propósito deste download?",
+                           dcc.RadioItems(
+                               options=[
+                                   {"label": "Pessoal", "value": 1},
+                                   {"label": "Profissional", "value": 2},
+                                   {"label": "Académico", "value": 3},
+                               ],
+                               # value=1,
+                               id="radio-modal",
+                           ),
+                           html.Div([None],id="hidden", style={'display': 'none'}),
+                           html.Div(id="hidden2", style={'display': 'none'})
+
+                           ]),
+
+            dbc.ModalFooter(
+
+                [
+                    html.A(
+                        children=dbc.Button("Download", id='download-file', className="ml-auto", color="primary",
+                                            size="lg",
+                                            disabled=True),
+                        # href=link,
+                        id='file-link'
+                    ),
+                    dbc.Button(
+                        "Close", id='cancel', className="m1-auto", size="lg", color="danger"
+                    )]
+            ),
+        ],
+        id='modal',
+        centered=True,
+        style={'font-family': layout['font']['family']}
+    ),
 ],
 )
 
 
+@app.callback(
+    Output('modal', "is_open"),
+    [
+        Input('target-p', "n_clicks"),
+        Input('target-f', "n_clicks"),
+        Input('target-em', "n_clicks"),
+        Input('download-file', "n_clicks"),
+        Input('cancel', "n_clicks")],
+    [State('modal', "is_open")],
+)
+def toggle_modal_consumo(np, nf, ne, nd, close, is_open):
+    if np or nf or ne or nd or close or is_open:
+        return not is_open
+    else:
+        return is_open
+
+
+@app.callback(
+Output('download-file', 'disabled'),
+[Input('radio-modal', "value"), Input('cancel', "n_clicks")]
+)
+def enable_dwnld_button(value, n):
+    if value:
+
+        return False
+    if n:
+        return True
+    else:
+        return True
+
+
+@app.callback(
+Output('radio-modal', "value"),
+[Input('modal', "is_open")]
+)
+def enable_radio(n):
+    if n:
+        return None
+
+
+@app.callback(
+    Output('hidden', 'children'),
+    [
+        Input('target-p', "n_clicks"),
+        Input('target-f', "n_clicks"),
+        Input('target-em', "n_clicks"),
+]
+)
+def regista_target(np, nf, ne):
+    if not ctx.triggered:
+        raise PreventUpdate
+    # print(ctx.triggered[0]['prop_id'])
+
+    if ctx.triggered[0]['prop_id'] == 'target-p.n_clicks':
+        return 0
+
+    elif ctx.triggered[0]['prop_id'] == 'target-f.n_clicks':
+        return 1
+
+    elif ctx.triggered[0]['prop_id'] == 'target-em.n_clicks':
+        return 2
+    else:
+        return None
+
+# links = ['/download/Energia_Primaria_Lisboa.xlsx', '/download/Energia_Final_Lisboa.xlsx', '/download/Emissoes_CO2_Lisboa.xlsx']
+
+
+@app.callback(
+    Output('file-link', 'href'),
+    [
+        Input('target-p', "n_clicks"),
+        Input('target-f', "n_clicks"),
+        Input('target-em', "n_clicks"),
+]
+)
+def update_link(np, nf, ne):
+    if not ctx.triggered:
+        raise PreventUpdate
+
+    if ctx.triggered[0]['prop_id'] == 'target-p.n_clicks':
+        return '/download/Energia_Primaria_Lisboa.xlsx'
+
+    elif ctx.triggered[0]['prop_id'] == 'target-f.n_clicks':
+        return '/download/Energia_Final_Lisboa.xlsx'
+
+    elif ctx.triggered[0]['prop_id'] == 'target-em.n_clicks':
+        return '/download/Emissoes_CO2_Lisboa.xlsx'
+    else:
+        return 'javascript:void(0);'
+
+
+@app.callback(
+    Output('hidden2', 'children'),
+    [
+        Input('radio-modal', "value"),
+        Input('hidden', "children"),
+        Input('download-file', "n_clicks"),
+
+    ],
+
+)
+def regista_pessoas(tipo, num, nd):
+
+    if not ctx.triggered:
+        raise PreventUpdate
+    # print(ctx.triggered)
+    if tipo == 1:
+        letra = 'pessoal'
+
+    elif tipo == 2:
+        letra = 'profissional'
+
+    else:
+        letra = 'academico'
+
+    if ctx.triggered[0]['prop_id'] == 'download-file.n_clicks':
+        # print("So agora aqui")
+
+        pessoa_lista = ["", "", ""]
+        pessoa_lista[num] = letra
+        registo = Pessoas(primaria=pessoa_lista[0], final = pessoa_lista[1], emissoes=pessoa_lista[2])
+        db.session.add(registo)
+        db.session.commit()
+
+        return None
+
+
 #
-#
+# registo = openpyxl.load_workbook('data/registo_pessoas.xlsx')
+# registo_sheet = registo['Sheet1']
+# registo_sheet[position] = registo_sheet[position].value + 1
+# registo.save('data/registo_pessoas.xlsx')
+
 # @app.callback(
 #     [Output("primaria", "active"),
 #      Output("final", "active"),
