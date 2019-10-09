@@ -537,11 +537,20 @@ def create_year_button(ano):
 
     return butao
 
+info_button_year = html.Div(
+    [
+        html.I(className="fas fa-question-circle fa-sm", id="target_year"),
+        dbc.Tooltip(target="target_year",
+                    style={'font-size': '1.4rem'}, id='tt-year-bar'),
+    ],
+    className="p-2 text-muted"
+)
+
 # slider + grafico de barras
 year_selector = html.Div([
 # "<br>(Seleccione o ano pretendido)"
-    html.H5(id='header-ano-bar', style={'textAlign': 'center', "padding": "0% 0% 0% 0%"}),
-    html.P("Seleccione o ano pretendido:", style={'textAlign': 'center', "padding": "0% 0% 10% 0%", 'font-style': 'italic'}),
+    dbc.Row([html.H5(id='header-ano-bar', style={'textAlign': 'center', "padding": "0% 0% 0% 0%"}),info_button_year], align='center', justify='center'),
+    html.P(dcc.Markdown('''**Seleccione o ano pretendido:**'''), style={'textAlign': 'center', "padding": "0% 0% 10% 0%", 'font-style': 'italic'}),
 
     html.Div(
         [create_year_button(2008), create_year_button(2009), create_year_button(2010),
@@ -555,10 +564,10 @@ year_selector = html.Div([
                     dcc.Graph(id="ano-bar-graph", config={'displayModeBar': False})]),
 
 
-    html.Div([dcc.Slider(id='year-selected', min=min(anos), max=max(anos), value=min(anos),
-                         marks={str(ano): str(ano) for ano in anos})],
-             style={'textAlign': "center", "margin-left": "1rem", "margin-right": "1rem", "padding": "1rem 1rem"}
-             ),
+    # html.Div([dcc.Slider(id='year-selected', min=min(anos), max=max(anos), value=min(anos),
+    #                      marks={str(ano): str(ano) for ano in anos})],
+    #          style={'textAlign': "center", "margin-left": "1rem", "margin-right": "1rem", "padding": "1rem 1rem"}
+    #          ),
     html.Div(id='hidd_year_bt', style={'display': 'none'})
         ])
 
@@ -640,7 +649,7 @@ sidebar = html.Div(
 
         html.Div([card_forma_sector], style={"padding": "0% 10% 0% 10%"}),
         html.Hr(),
-        year_selector,
+        html.Div([year_selector], style={"padding": "0% 0% 0% 0%"}),
         html.Hr(),
         dbc.Row(html.H5('DOWNLOADS:', style={'font-weight': 'bold', "textAlign": "center"}), align='center', justify='center'),
         # html.Hr(),
@@ -854,66 +863,66 @@ app.layout = html.Div([
         centered=True,
         style={'font-family': layout['font']['family']}
     ),
-    html.Div(id='mem-df', style={'display': 'none'}),
+    # html.Div(id='mem-df', style={'display': 'none'}),
 ],
 )
-
-@app.callback(
-    Output('mem-df', 'children'),
-    [
-    Input('tabs', 'active_tab'),
-    Input('dd-primaria-final', 'value'),
-    Input('dd-forma-sector', 'value')
-    ]
-)
-
-def update_memory_df(at,prim_fin, form_sect):
-
-    if at == 'tab-energia':
-
-        if prim_fin == 'Final':
-
-            if form_sect == 'Sector':
-                df_1 = sector_df_fi
-                df_2 = forma_df_fi
-                anual = sector_anual_fi
-
-            else:
-                df_1 = forma_df_fi
-                df_2 = sector_df_fi
-                anual = forma_anual_fi
-
-
-        else:
-
-            if form_sect == 'Sector':
-                df_1 = sector_df_pr
-                df_2 = forma_df_pr
-                anual = sector_anual_pr
-
-            else:
-                df_1 = forma_df_pr
-                df_2 = sector_df_pr
-                anual = forma_anual_pr
-
-    else:
-
-        if form_sect == 'Sector':
-            df_1 = sector_df_em
-            df_2 = forma_df_em
-            anual = sector_anual_em
-        else:
-            df_1 = forma_df_em
-            df_2 = sector_df_em
-            anual = forma_anual_em
-
-
-    datasets = {
-        'df_1': df_1.to_json(orient='split', date_format='iso'),
-        'df_2': df_2.to_json(orient='split', date_format='iso'),
-        'anual': anual.to_json(orient='split', date_format='iso'),
-    }
-    return json.dumps(datasets)
+#
+# @app.callback(
+#     Output('mem-df', 'children'),
+#     [
+#     Input('tabs', 'active_tab'),
+#     Input('dd-primaria-final', 'value'),
+#     Input('dd-forma-sector', 'value')
+#     ]
+# )
+#
+# def update_memory_df(at,prim_fin, form_sect):
+#
+#     if at == 'tab-energia':
+#
+#         if prim_fin == 'Final':
+#
+#             if form_sect == 'Sector':
+#                 df_1 = sector_df_fi
+#                 df_2 = forma_df_fi
+#                 anual = sector_anual_fi
+#
+#             else:
+#                 df_1 = forma_df_fi
+#                 df_2 = sector_df_fi
+#                 anual = forma_anual_fi
+#
+#
+#         else:
+#
+#             if form_sect == 'Sector':
+#                 df_1 = sector_df_pr
+#                 df_2 = forma_df_pr
+#                 anual = sector_anual_pr
+#
+#             else:
+#                 df_1 = forma_df_pr
+#                 df_2 = sector_df_pr
+#                 anual = forma_anual_pr
+#
+#     else:
+#
+#         if form_sect == 'Sector':
+#             df_1 = sector_df_em
+#             df_2 = forma_df_em
+#             anual = sector_anual_em
+#         else:
+#             df_1 = forma_df_em
+#             df_2 = sector_df_em
+#             anual = forma_anual_em
+#
+#
+#     datasets = {
+#         'df_1': df_1.to_json(orient='split', date_format='iso'),
+#         'df_2': df_2.to_json(orient='split', date_format='iso'),
+#         'anual': anual.to_json(orient='split', date_format='iso'),
+#     }
+#     return json.dumps(datasets)
 
 @app.callback(
     Output('modal', "is_open"),
@@ -1164,7 +1173,9 @@ def update_button_outline(ano_bar_graph_selected, sel_2008, sel_2009, sel_2010, 
         return anos_bool + [json.dumps(str(ano))]
 
 
-@app.callback([Output('header-ano-bar', 'children'),
+@app.callback([
+Output('tt-year-bar', 'children'),
+    Output('header-ano-bar', 'children'),
                Output('header-forma-sector', 'children')],
               [Input('tabs', 'active_tab'),
                Input('dd-primaria-final', 'value'),
@@ -1174,11 +1185,11 @@ def headers_emissoes(at, prim_fin):
     if not dash.callback_context.triggered:
         raise PreventUpdate
     if at == "tab-emissoes":
-        return 'Emissões de CO2 por ano (ton)', 'Emissões de CO2 por:'
+        return dcc.Markdown('''**ton** corresponde a toneladas de CO2.'''), 'Emissões de CO2 por ano (ton)', 'Emissões de CO2 por:'
 
     else:
         head_a_b = 'Consumo total de Energia {} anual (tep)'.format(prim_fin)
-        return head_a_b, 'Seleccione a desagragação pretendida:'
+        return dcc.Markdown('''**tep** corresponde a tonelada equivalente de petróleo.'''), head_a_b, 'Seleccione a desagragação pretendida:'
 
 
 #
@@ -1216,11 +1227,10 @@ def headers_emissoes(at, prim_fin):
      Input('dd-primaria-final', 'value'),
      Input('tabs', 'active_tab'),
      Input("mem-year", "children"),
-        Input('mem-df', 'children')
 
     ]
 )
-def update_ano_bar(prim_fin, at, ano_mem, df_mem):
+def update_ano_bar(prim_fin, at, ano_mem):
     if not ctx.triggered:
         raise PreventUpdate
 
