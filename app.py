@@ -242,10 +242,12 @@ server = app.server
 app.css.config.serve_locally = True
 app.scripts.config.serve_locally = True
 
-#SQL_ALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-#SECRET_KEY = os.environ.get('SECRET_KEY')
+# app.server.config['SECRET_KEY'] = '60b69ea75d65bfc586c4e778a9357219'
+# app.server.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+# HEROKU
 app.server.config['SECRET_KEY'] = '60b69ea75d65bfc586c4e778a9357219'
 app.server.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://jedcrkiqvpgghw:a55d8ab5271e0b58a11aa3f350384741181a593f53d5c4da6ccbd4fd2db74737@ec2-54-246-100-246.eu-west-1.compute.amazonaws.com:5432/da5crrdk573292'
+
 app.server.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app.server)
@@ -828,7 +830,8 @@ app.layout = html.Div([
                                id="radio-modal",
                            ),
                            html.Div([None],id="hidden", style={'display': 'none'}),
-                           html.Div(id="hidden2", style={'display': 'none'})
+                           html.Div(id="hidden2", style={'display': 'none'}),
+                           html.Div(id="hidden3", style={'display': 'none'})
 
                            ]),
 
@@ -966,13 +969,13 @@ def regista_target(np, nf, ne):
     # print(ctx.triggered[0]['prop_id'])
 
     if ctx.triggered[0]['prop_id'] == 'target-p.n_clicks':
-        return 0
+        return json.dumps(str(0))
 
     elif ctx.triggered[0]['prop_id'] == 'target-f.n_clicks':
-        return 1
+        return json.dumps(str(1))
 
     elif ctx.triggered[0]['prop_id'] == 'target-em.n_clicks':
-        return 2
+        return json.dumps(str(2))
     else:
         return None
 
@@ -1005,22 +1008,13 @@ def update_link(np, nf, ne):
     else:
         return 'javascript:void(0);'
 
-
 @app.callback(
     Output('hidden2', 'children'),
-    [
-        Input('radio-modal', "value"),
-        Input('hidden', "children"),
-        Input('download-file', "n_clicks"),
-
-    ],
-
+    [Input('radio-modal', "value")]
 )
-def regista_pessoas(tipo, num, nd):
-
+def regista_tipo(tipo):
     if not ctx.triggered:
         raise PreventUpdate
-    # print(ctx.triggered)
     if tipo == 1:
         letra = 'pessoal'
 
@@ -1029,16 +1023,40 @@ def regista_pessoas(tipo, num, nd):
 
     else:
         letra = 'academico'
+    return json.dumps(letra)
+
+@app.callback(
+    Output('hidden3', 'children'),
+    [
+
+        Input('download-file', "n_clicks"),
+    ],
+    [
+        State('hidden2', "children"),
+        State('hidden', "children"),
+    ]
+)
+def regista_pessoas(nd, letra, num):
+    if not ctx.triggered:
+        raise PreventUpdate
+
+    # print(ctx.triggered)
+    try:
+        letra = json.loads(letra)
+    except (TypeError, ValueError) as e:
+        raise PreventUpdate
+    try:
+        num = int(json.loads(num))
+    except (TypeError, ValueError) as e:
+        raise PreventUpdate
 
     if ctx.triggered[0]['prop_id'] == 'download-file.n_clicks':
-        # print("So agora aqui")
 
         pessoa_lista = ["", "", ""]
         pessoa_lista[num] = letra
-        registo = Pessoas(primaria=pessoa_lista[0], final = pessoa_lista[1], emissoes=pessoa_lista[2])
+        registo = Pessoas(primaria=pessoa_lista[0], final=pessoa_lista[1], emissoes=pessoa_lista[2])
         db.session.add(registo)
         db.session.commit()
-
         return None
 
 
@@ -1126,7 +1144,7 @@ def download(path):
 def update_button_outline(ano_bar_graph_selected, sel_2008, sel_2009, sel_2010, sel_2011, sel_2012, sel_2013, sel_2014, sel_2015, sel_2016):
     if not dash.callback_context.triggered:
         raise PreventUpdate
-    print(ctx.triggered[0]['prop_id'])
+    # print(ctx.triggered[0]['prop_id'])
 
     if ctx.triggered[0]['prop_id'] != 'ano-bar-graph.clickData':
         anos_bool = [ctx.triggered[0]['prop_id'] != f'sel_{a}.n_clicks' for a in anos]
@@ -1137,7 +1155,7 @@ def update_button_outline(ano_bar_graph_selected, sel_2008, sel_2009, sel_2010, 
         a_pos = anos_bool.index(False)
         ano = anos[a_pos]
 
-        print(anos_bool, ano)
+        # print(anos_bool, ano)
         return anos_bool + [json.dumps(str(ano))]
     else:
         anos_bool = [ano != ano_bar_graph_selected['points'][0]['x'] for ano in anos]
