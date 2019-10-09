@@ -241,10 +241,10 @@ server = app.server
 app.css.config.serve_locally = True
 app.scripts.config.serve_locally = True
 
-SQL_ALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-SECRET_KEY = os.environ.get('SECRET_KEY')
+#SQL_ALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+#SECRET_KEY = os.environ.get('SECRET_KEY')
 app.server.config['SECRET_KEY'] = '60b69ea75d65bfc586c4e778a9357219'
-app.server.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app.server.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://jedcrkiqvpgghw:a55d8ab5271e0b58a11aa3f350384741181a593f53d5c4da6ccbd4fd2db74737@ec2-54-246-100-246.eu-west-1.compute.amazonaws.com:5432/da5crrdk573292'
 app.server.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app.server)
