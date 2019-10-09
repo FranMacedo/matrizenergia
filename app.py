@@ -1,3 +1,4 @@
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -9,7 +10,9 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 from flask import send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-
+import os
+import json
+# import figures_save
 
 ctx = dash.callback_context
 ton_k = "k ton"
@@ -57,89 +60,87 @@ unidades_emissoes = 'ton'
 unidades_energia = 'tep'
 
 
+# JA NAO E PRECISO ESTA FUNCAO, VISTO QUE CRIEI EXCEIS INDEPENDENTES
+# def cria_df(file_path):
+#     forma_df = pd.read_excel(file_path)
+#
+#     # errados = ['Indústria', 'Serviços', 'Doméstico']
+#     # correctos = ['Industria', 'Servicos', 'Domestico']
+#     # forma_df = forma_df.replace(errados, correctos)
+#     forma_df.rename(columns={'Outros ': 'Outros'}, inplace=True)
+#
+#     # aa = forma_df.loc[forma_df['Ano'] == 2016, :]
+#     # aa = aa.iloc[:, 1:-1]
+#     # aa_sum = aa.to_numpy().sum()
+#
+#     forma_df.fillna(0, inplace=True)
+#     anos = list(forma_df.Ano.unique())
+#     # numero_anos = len(anos)
+#     forma_df_sem_ano = forma_df.iloc[:, :-1]
+#     # forma_sector_df = forma_df_sem_ano.groupby(['Sector']).sum()
+#     forma_anual = forma_df.groupby(['Ano']).sum()
+#     forma_anual['Total'] = forma_anual.sum(axis=1)
+#
+#     sector_df = forma_df.transpose().copy()
+#     sector_df.rename(columns=sector_df.iloc[0], inplace=True)
+#     sector_df.drop('Sector', inplace=True)
+#     sector_df_temp = sector_df.iloc[:7, 0:5].copy()
+#     sector_df_temp['Ano'] = anos[0]
+#     sector_df_temp.reset_index(inplace=True)
+#     sector_df_temp.rename(columns={'index': 'Forma'}, inplace=True)
+#
+#     for ano in anos[1:]:
+#         df = sector_df.loc[:, sector_df.loc['Ano', ] == ano].copy()
+#         df.loc[:, 'Ano'] = ano
+#         df.drop('Ano', axis=0, inplace=True)
+#         df.reset_index(inplace=True)
+#         df = df.rename(columns={'index': 'Forma'})
+#
+#         sector_df_temp = pd.concat([sector_df_temp, df], ignore_index=True)
+#
+#     sector_df = sector_df_temp
+#     sector_anual = sector_df.groupby(['Ano']).sum()
+#     sector_anual.drop('Forma', axis=1, inplace=True)
+#
+#     forma_list = sorted(forma_df.columns[1:-1].tolist())
+#     sector_list = sorted(sector_df.columns[1:-1].tolist())
+#     forma_df = forma_df.round(0)
+#     sector_df = sector_df.round(0)
+#     forma_anual = forma_anual.round(0)
+#     sector_anual = sector_anual.round(0)
+#     # forma_sector_df = forma_sector_df.round(0)
+#
+#     forma_df['color_fill'] = forma_df['Sector'].apply(lambda x: color_5_dead_d[x])
+#     forma_df['color_line'] = forma_df['Sector'].apply(lambda x: color_5_live_d[x])
+#
+#     sector_df['color_fill'] = sector_df['Forma'].apply(lambda x: color_7_dead_d[x])
+#     sector_df['color_line'] = sector_df['Forma'].apply(lambda x: color_7_live_d[x])
+#
+#
+#     # forma_df['color_dead'] = color_5_dead * len(anos)
+#     # forma_df['color_live'] = color_5_live * len(anos)
+#     #
+#     # sector_df['color_dead'] = color_7_dead * len(anos)
+#     # sector_df['color_live'] = color_7_live * len(anos)
+#
+#     return forma_df, sector_df, forma_anual, sector_anual, forma_list, sector_list, anos
 
-def cria_df(file_path):
-    forma_df = pd.read_excel(file_path)
 
-    # errados = ['Indústria', 'Serviços', 'Doméstico']
-    # correctos = ['Industria', 'Servicos', 'Domestico']
-    # forma_df = forma_df.replace(errados, correctos)
-    forma_df.rename(columns={'Outros ': 'Outros'}, inplace=True)
-
-    # aa = forma_df.loc[forma_df['Ano'] == 2016, :]
-    # aa = aa.iloc[:, 1:-1]
-    # aa_sum = aa.to_numpy().sum()
-
-    forma_df.fillna(0, inplace=True)
-    anos = list(forma_df.Ano.unique())
-    # numero_anos = len(anos)
-    forma_df_sem_ano = forma_df.iloc[:, :-1]
-    forma_sector_df = forma_df_sem_ano.groupby(['Sector']).sum()
-    forma_anual = forma_df.groupby(['Ano']).sum()
-    forma_anual['Total'] = forma_anual.sum(axis=1)
-
-    sector_df = forma_df.transpose().copy()
-    sector_df.rename(columns=sector_df.iloc[0], inplace=True)
-    sector_df.drop('Sector', inplace=True)
-    sector_df_temp = sector_df.iloc[:7, 0:5].copy()
-    sector_df_temp['Ano'] = anos[0]
-    sector_df_temp.reset_index(inplace=True)
-    sector_df_temp.rename(columns={'index': 'Forma'}, inplace=True)
-
-    for ano in anos[1:]:
-        df = sector_df.loc[:, sector_df.loc['Ano', ] == ano].copy()
-        df.loc[:, 'Ano'] = ano
-        df.drop('Ano', axis=0, inplace=True)
-        df.reset_index(inplace=True)
-        df = df.rename(columns={'index': 'Forma'})
-
-        sector_df_temp = pd.concat([sector_df_temp, df], ignore_index=True)
-
-    sector_df = sector_df_temp
-    sector_anual = sector_df.groupby(['Ano']).sum()
-    sector_anual.drop('Forma', axis=1, inplace=True)
-
-    forma_list = sorted(forma_df.columns[1:-1].tolist())
-    sector_list = sorted(sector_df.columns[1:-1].tolist())
-    forma_df = forma_df.round(0)
-    sector_df = sector_df.round(0)
-    forma_anual = forma_anual.round(0)
-    sector_anual = sector_anual.round(0)
-    forma_sector_df = forma_sector_df.round(0)
-
-    forma_df['color_fill'] = forma_df['Sector'].apply(lambda x: color_5_dead_d[x])
-    forma_df['color_line'] = forma_df['Sector'].apply(lambda x: color_5_live_d[x])
-
-    sector_df['color_fill'] = sector_df['Forma'].apply(lambda x: color_7_dead_d[x])
-    sector_df['color_line'] = sector_df['Forma'].apply(lambda x: color_7_live_d[x])
-
-
-    # forma_df['color_dead'] = color_5_dead * len(anos)
-    # forma_df['color_live'] = color_5_live * len(anos)
-    #
-    # sector_df['color_dead'] = color_7_dead * len(anos)
-    # sector_df['color_live'] = color_7_live * len(anos)
-
-    return forma_df, sector_df, forma_anual, sector_anual, forma_sector_df, forma_list, sector_list, anos
-
-
-def change_df(which_df, primaria_final):
-    if primaria_final == 'primaria':
-        forma_df, sector_df, forma_anual, sector_anual, forma_sector_df = forma_df_pr, sector_df_pr, forma_anual_pr, \
-                                                                          sector_anual_pr, forma_sector_df_pr
-    else:
-        forma_df, sector_df, forma_anual, sector_anual, forma_sector_df = forma_df_fi, sector_df_fi, forma_anual_fi, \
-                                                                          sector_anual_fi, forma_sector_df_fi
-
-    return {
-        "forma_df": forma_df,
-        "sector_df": sector_df,
-        "forma_anual": forma_anual,
-        "sector_anual": sector_anual,
-        "forma_sector_df": forma_sector_df,
-    }[which_df]
-
-    # return forma_df, sector_df, forma_anual, sector_anual, forma_sector_df
+# def change_df(which_df, primaria_final):
+#     if primaria_final == 'primaria':
+#         forma_df, sector_df, forma_anual, sector_anual = forma_df_pr, sector_df_pr, forma_anual_pr, \
+#                                                                           sector_anual_pr
+#     else:
+#         forma_df, sector_df, forma_anual, sector_anual  = forma_df_fi, sector_df_fi, forma_anual_fi, \
+#                                                                           sector_anual_fi
+#
+#     return {
+#         "forma_df": forma_df,
+#         "sector_df": sector_df,
+#         "forma_anual": forma_anual,
+#         "sector_anual": sector_anual,
+#     }[which_df]
+#
 
 
 def cria_cores(cores_5_7, select):
@@ -161,20 +162,34 @@ def cria_cores(cores_5_7, select):
     return colors
 
 
-energia_final_path = "data/energia_final.xlsx"
-energia_primaria_path = "data/energia_primaria.xlsx"
-emissoes_path = "data/emissoes_CO2.xlsx"
+# energia_final_path = "data/energia_final.xlsx"
+# energia_primaria_path = "data/energia_primaria.xlsx"
+# emissoes_path = "data/emissoes_CO2.xlsx"
 
+def create_anual(df):
+    df_anual = df.groupby(['Ano']).sum()
+    df_anual['Total'] = df_anual.sum(axis=1)
+    df_anual = df_anual.round(0)
+    return df_anual
 
-forma_df_fi, sector_df_fi, forma_anual_fi, sector_anual_fi, forma_sector_df_fi, forma_list, sector_list, anos \
-    = cria_df(energia_final_path)
+forma_df_fi = pd.read_excel('data/forma_fi.xlsx')
+sector_df_fi = pd.read_excel('data/sector_fi.xlsx')
+forma_df_pr = pd.read_excel('data/forma_pr.xlsx')
+sector_df_pr = pd.read_excel('data/sector_pr.xlsx')
+forma_df_em = pd.read_excel('data/forma_em.xlsx')
+sector_df_em = pd.read_excel('data/sector_em.xlsx')
 
-forma_df_pr, sector_df_pr, forma_anual_pr, sector_anual_pr, forma_sector_df_pr, forma_list_pr, sector_list_pr, \
-    anos_pr = cria_df(energia_primaria_path)
+forma_anual_fi = create_anual(forma_df_fi)
+sector_anual_fi = create_anual(sector_df_fi).iloc[:, :-1]
+forma_anual_pr = create_anual(forma_df_pr)
+sector_anual_pr = create_anual(sector_df_pr).iloc[:, :-1]
+forma_anual_em = create_anual(forma_df_em)
+sector_anual_em = create_anual(sector_df_em).iloc[:, :-1]
 
-forma_df_em, sector_df_em, forma_anual_em, sector_anual_em, forma_sector_df_em, forma_list_em, sector_list_em, \
-    anos_em = cria_df(emissoes_path)
-
+forma_list = sorted(forma_df_fi.columns[1:-3].tolist())
+sector_list = sorted(sector_df_fi.columns[1:-3].tolist())
+anos = forma_anual_fi.index.unique().tolist()
+anos.sort()
 # Total de energia em texto e milhões
 total_m_fi = list(round(forma_anual_fi['Total'] / 1000000, 1))
 total_m_fi = list(map(str, total_m_fi))
@@ -188,6 +203,36 @@ total_m_em = list(round(forma_anual_em['Total'] / 1000 / 1000000, 1))
 total_m_em = list(map(str, total_m_em))
 total_m_em = [a + ' kM' for a in total_m_em]
 
+def get_ano_bar_plot():
+    forma_anual = forma_anual_fi
+    color_fill = ['#9BD7F1', ] * len(forma_anual.index)
+    color_fill[-1] = '#029CDE'
+    color_line = ['#029CDE', ] * len(forma_anual.index)
+    total_m = total_m_fi
+    my_text = 'aaaa'
+    layout_ano_bar = copy.deepcopy(layout)
+
+    fig = go.Figure(data=[go.Bar(
+        x=forma_anual.index,
+        y=forma_anual['Total'],
+        marker_color=color_fill,
+        marker_line_color=color_line,
+        text=total_m,
+        hovertext=my_text,
+        hoverinfo='text',
+        textposition='outside',
+        hoverlabel=dict(font=dict(family=layout['font']['family'])),
+    )])
+
+    layout_ano_bar['margin'] = dict(l=0, r=0, b=0, t=0)
+    layout_ano_bar['height'] = 200
+    layout_ano_bar['dragmode'] = 'select'
+    fig.update_layout(layout_ano_bar)
+    # fig.update_layout(height=350)
+    fig.update_yaxes(automargin=True, range=[0, max(forma_anual['Total']) * 1.15],
+                     autorange=False, fixedrange=True, showticklabels=False)
+    fig.update_xaxes(fixedrange=True)
+
 FONT_AWESOME = "https://use.fontawesome.com/releases/v5.10.2/css/all.css"
 external_stylesheets = [dbc.themes.BOOTSTRAP, FONT_AWESOME]
 
@@ -195,7 +240,8 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 app.css.config.serve_locally = True
 app.scripts.config.serve_locally = True
-app.server.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///site.db'
+app.server.config['SECRET_KEY'] = '60b69ea75d65bfc586c4e778a9357219'
+app.server.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.server.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app.server)
@@ -222,7 +268,45 @@ layout = dict(
     paper_bgcolor="#F9F9F9",
 
 )
-#
+layout_ano_bar = copy.deepcopy(layout)
+layout_ano_bar['margin'] = dict(l=0, r=0, b=0, t=0)
+layout_ano_bar['height'] = 200
+layout_ano_bar['dragmode'] = 'select'
+layout_ano_bar['xaxis'] = dict(fixedrange=True)
+layout_ano_bar['yaxis'] = dict(automargin=True, autorange=False, fixedrange=True, showticklabels=False)
+
+layout_donut = copy.deepcopy(layout)
+layout_donut['legend'] = go.layout.Legend(
+    # x=1.1,
+    # y=-0.2,
+    traceorder="normal",
+    font=dict(
+        # size=13,
+        color="black"
+    ),
+    bgcolor='rgba(0,0,0,0)',
+    orientation='h'
+)
+layout_donut['autosize'] = True
+layout_donut['margin'] = dict(l=25, r=35, b=20, t=20)
+
+
+layout_bar_single = copy.deepcopy(layout)
+layout_bar_single['margin'] = dict(l=0, r=0, b=0, t=0)
+layout_bar_single['height'] = 300
+layout_bar_single['hovermode'] = "y"
+
+layout_ano_line = copy.deepcopy(layout)
+layout_ano_line['legend'] = go.layout.Legend(
+    font=dict(
+        # size=13,
+        color="black"
+    ))
+layout_ano_line['hovermode'] = "x"
+layout_ano_line['margin'] = dict(l=20, r=150, b=20, t=20)
+layout_ano_line['height'] = 300
+layout_ano_line['hoverlabel'] = dict(font=dict(family=layout['font']['family']))
+
 # SIDEBAR_STYLE = {
 #     # "position": "fixed",
 #     "top": 0,
@@ -441,6 +525,11 @@ card_forma_sector = html.Div(
     ]
 )
 
+##029CDE , "background-color": "#029CDE"
+def create_year_button(ano):
+    butao = dbc.Button(ano, color='primary', outline=True, id='sel_{}'.format(ano), style={'width': '{}%'.format(100/len(anos))})
+
+    return butao
 
 # slider + grafico de barras
 year_selector = html.Div([
@@ -448,14 +537,23 @@ year_selector = html.Div([
     html.H5(id='header-ano-bar', style={'textAlign': 'center', "padding": "0% 0% 0% 0%"}),
     html.P("Seleccione o ano pretendido:", style={'textAlign': 'center', "padding": "0% 0% 10% 0%", 'font-style': 'italic'}),
 
+    html.Div(
+        [create_year_button(2008), create_year_button(2009), create_year_button(2010),
+         create_year_button(2011), create_year_button(2012), create_year_button(2013),
+         create_year_button(2014), create_year_button(2015), create_year_button(2016)],
+        # style={'textAlign': "center", "margin-left": "1rem", "margin-right": "1rem", "padding": "1rem 1rem"}
+    ),
+    html.Div(id='mem-year', style={'display':'none'}),
     dcc.Loading(id="loading-ano-bar", type="circle",
                 children=[
                     dcc.Graph(id="ano-bar-graph", config={'displayModeBar': False})]),
 
+
     html.Div([dcc.Slider(id='year-selected', min=min(anos), max=max(anos), value=min(anos),
                          marks={str(ano): str(ano) for ano in anos})],
              style={'textAlign': "center", "margin-left": "1rem", "margin-right": "1rem", "padding": "1rem 1rem"}
-             )
+             ),
+    html.Div(id='hidd_year_bt', style={'display': 'none'})
         ])
 
 download_button_em = html.Div(
@@ -749,9 +847,66 @@ app.layout = html.Div([
         centered=True,
         style={'font-family': layout['font']['family']}
     ),
+    html.Div(id='mem-df', style={'display': 'none'}),
 ],
 )
 
+@app.callback(
+    Output('mem-df', 'children'),
+    [
+    Input('tabs', 'active_tab'),
+    Input('dd-primaria-final', 'value'),
+    Input('dd-forma-sector', 'value')
+    ]
+)
+
+def update_memory_df(at,prim_fin, form_sect):
+
+    if at == 'tab-energia':
+
+        if prim_fin == 'Final':
+
+            if form_sect == 'Sector':
+                df_1 = sector_df_fi
+                df_2 = forma_df_fi
+                anual = sector_anual_fi
+
+            else:
+                df_1 = forma_df_fi
+                df_2 = sector_df_fi
+                anual = forma_anual_fi
+
+
+        else:
+
+            if form_sect == 'Sector':
+                df_1 = sector_df_pr
+                df_2 = forma_df_pr
+                anual = sector_anual_pr
+
+            else:
+                df_1 = forma_df_pr
+                df_2 = sector_df_pr
+                anual = forma_anual_pr
+
+    else:
+
+        if form_sect == 'Sector':
+            df_1 = sector_df_em
+            df_2 = forma_df_em
+            anual = sector_anual_em
+        else:
+            df_1 = forma_df_em
+            df_2 = sector_df_em
+            anual = forma_anual_em
+
+
+    datasets = {
+        'df_1': df_1.to_json(orient='split', date_format='iso'),
+        'df_2': df_2.to_json(orient='split', date_format='iso'),
+        'anual': anual.to_json(orient='split', date_format='iso'),
+    }
+    return json.dumps(datasets)
 
 @app.callback(
     Output('modal', "is_open"),
@@ -955,59 +1110,102 @@ def regista_pessoas(tipo, num, nd):
 def download(path):
     """Serve a file from the upload directory."""
     return send_from_directory("data", path, as_attachment=True)
+
+# hidd_year_bt
+
 @app.callback(
-    Output("year-selected", "value"),
-    [Input("ano-bar-graph", "clickData")])
-def update_year_slider(ano_bar_graph_selected):
+    [Output(f"sel_{a}", "outline") for a in anos]
+    + [Output("mem-year", "children")]
+    ,
+    [Input("ano-bar-graph", "clickData")] + [Input(f"sel_{a}", "n_clicks") for a in anos]
+)
+def update_button_outline(ano_bar_graph_selected, sel_2008, sel_2009, sel_2010, sel_2011, sel_2012, sel_2013, sel_2014, sel_2015, sel_2016):
     if not dash.callback_context.triggered:
         raise PreventUpdate
+    print(ctx.triggered[0]['prop_id'])
 
-    if ano_bar_graph_selected is None:
-        return 2016
+    if ctx.triggered[0]['prop_id'] != 'ano-bar-graph.clickData':
+        anos_bool = [ctx.triggered[0]['prop_id'] != f'sel_{a}.n_clicks' for a in anos]
+
+        if sum(anos_bool) == len(anos):
+            anos_bool = [True]*(len(anos)-1) + [False]
+
+        a_pos = anos_bool.index(False)
+        ano = anos[a_pos]
+
+        print(anos_bool, ano)
+        return anos_bool + [json.dumps(str(ano))]
     else:
-        return ano_bar_graph_selected['points'][0]['x']
-
+        anos_bool = [ano != ano_bar_graph_selected['points'][0]['x'] for ano in anos]
+        a_pos = anos_bool.index(False)
+        ano = anos[a_pos]
+        return anos_bool + [json.dumps(str(ano))]
 
 
 @app.callback([Output('header-ano-bar', 'children'),
                Output('header-forma-sector', 'children')],
               [Input('tabs', 'active_tab'),
-               Input('dd-primaria-final', 'value')
+               Input('dd-primaria-final', 'value'),
                ]
               )
 def headers_emissoes(at, prim_fin):
     if not dash.callback_context.triggered:
         raise PreventUpdate
     if at == "tab-emissoes":
-        return 'Emissões de CO2 por ano (ton/tep)', 'Emissões de CO2 por:'
+        return 'Emissões de CO2 por ano (ton)', 'Emissões de CO2 por:'
 
     else:
         head_a_b = 'Consumo total de Energia {} anual (tep)'.format(prim_fin)
         return head_a_b, 'Seleccione a desagragação pretendida:'
 
 
+#
+# @app.callback(
+#     [Output(f"sel_{a}", "outline") for a in anos],
+#     [Input(f"sel_{a}", "n_clicks") for a in anos]
+# )
+# def update_butoes(sel_2008, sel_2009, sel_2010, sel_2011, sel_2012, sel_2013, sel_2014, sel_2015, sel_2016):
+#
+#     anos_bool = [ctx.triggered[0]['prop_id'] == f'sel_{a}.n_clicks' for a in anos]
+#     if sum(anos_bool) == 0:
+#         anos_bool = [False]*(len(anos)-1) + [True]
+#     # a_pos = anos_bool.index(True)
+#     # ano = anos[a_pos]
+#
+#     return anos_bool
+
+
+@app.callback(
+    Output("hidd_year_bt", "children"),
+    [
+
+]
+)
+
 @app.callback(
     [
     Output('down-pf-container', 'style'),
     Output('down-em-container', 'style'),
     Output("ano-bar-graph", "figure"),
+
     ],
-    [Input("year-selected", "value"),
+    [
+        # Input("year-selected", "value"),
      Input('dd-primaria-final', 'value'),
      Input('tabs', 'active_tab'),
-     ]
+     Input("mem-year", "children"),
+        Input('mem-df', 'children')
 
+    ]
 )
-def update_ano_bar(ano, prim_fin, at):
-
-
+def update_ano_bar(prim_fin, at, ano_mem, df_mem):
     if not ctx.triggered:
         raise PreventUpdate
 
-    trigger = ctx.triggered[0]['prop_id'].split('.')[0]
-    trigger_value = ctx.triggered[0]['value']
-
-
+    try:
+        ano = int(json.loads(ano_mem))
+    except (ValueError, TypeError) as e:
+        ano = 2016
 
     if at == "tab-emissoes":
         visi_em = {'display': 'inline'}
@@ -1018,27 +1216,19 @@ def update_ano_bar(ano, prim_fin, at):
         # unidade = unidades_emissoes
         unidade = ton_M
 
-
-
     else:
         unidade = tep_k
         visi_em = {'display': 'none'}
         visi_pf = {'display': 'inline'}
 
         if prim_fin == 'Primária':
-            forma_anual = change_df('forma_anual', 'primaria')/1000
+            forma_anual =forma_anual_pr/1000
             total_m = total_m_pr
 
         else:
-            forma_anual = change_df('forma_anual', 'final')/1000
+            forma_anual = forma_anual_fi/1000
             total_m = total_m_fi
 
-
-
-
-
-
-    layout_ano_bar = copy.deepcopy(layout)
 
     ano_posi = list(forma_anual.index).index(ano)
     color_fill = ['#9BD7F1', ] * len(forma_anual.index)
@@ -1057,37 +1247,33 @@ def update_ano_bar(ano, prim_fin, at):
         hoverinfo='text',
         textposition='outside',
         hoverlabel=dict(font=dict(family=layout['font']['family'])),
-
-
     )])
 
-    layout_ano_bar['margin'] = dict(l=0, r=0, b=0, t=0)
-    layout_ano_bar['height'] = 200
-    layout_ano_bar['dragmode'] = 'select'
     fig.update_layout(layout_ano_bar)
-    # fig.update_layout(height=350)
-    fig.update_yaxes(automargin=True, range=[0, max(forma_anual['Total'])*1.15],
-                     autorange=False, fixedrange=True, showticklabels=False)
-    fig.update_xaxes(fixedrange=True)
+    fig.update_yaxes(range=[0, max(forma_anual['Total'])*1.15])
 
-    # fig.update_yaxes()
+
     return visi_pf, visi_em, fig
 
 
 @app.callback([Output('header-ano-line', 'children'),
               Output('header-donut', 'children')],
-              [Input("year-selected", "value"),
+              [Input("mem-year", "children"),
                Input('tabs', 'active_tab'),
                Input('dd-primaria-final', 'value'),
                Input('dd-forma-sector', 'value')
                ],
 
               )
-def header_donut_ano_line(ano, at, prim_fin, form_sect):
+def header_donut_ano_line(ano_mem, at, prim_fin, form_sect):
     ctx = dash.callback_context
 
     if not ctx.triggered:
         raise PreventUpdate
+    try:
+        ano = int(json.loads(ano_mem))
+    except (ValueError, TypeError) as e:
+        ano = 2016
 
     if at == "tab-emissoes":
         unidade = unidades_emissoes
@@ -1121,25 +1307,23 @@ def header_donut_ano_line(ano, at, prim_fin, form_sect):
 # Donut Total
 @app.callback(
     Output("donut-graph", "figure"),
-    [Input("year-selected", "value"),
+    [Input("mem-year", "children"),
      Input('dd-forma-sector', 'value'),
-     # Input('donut-graph', 'clickData'),
+     Input('donut-graph', 'clickData'),
      Input('tabs', 'active_tab'),
-     # Input('dropdown-single', 'value'),
+     Input('dropdown-single', 'value'),
      Input('dd-primaria-final', 'value'),
      ]
 )
-def update_donut(ano, form_sect, at, prim_fin):
+def update_donut(ano_mem, form_sect,selecao, at, dd_select, prim_fin):
 
     if not ctx.triggered:
         raise PreventUpdate
 
-    # trigger = ctx.triggered[0]['prop_id'].split('.')[0]
-    # trigger_value = ctx.triggered[0]['value']
-
-
-    layout_donut = copy.deepcopy(layout)
-
+    try:
+        ano = int(json.loads(ano_mem))
+    except (ValueError, TypeError) as e:
+        ano = 2016
 
     if at == "tab-emissoes":
         forma_anual = forma_anual_em / 1000
@@ -1152,11 +1336,11 @@ def update_donut(ano, form_sect, at, prim_fin):
         unidade_2 = unidades_energia
 
         if prim_fin == 'Primária':
-            sector_anual = change_df('sector_anual', 'primaria')
-            forma_anual = change_df('forma_anual', 'primaria')
+            sector_anual =sector_anual_pr
+            forma_anual = forma_anual_pr
         else:
-            sector_anual = change_df('sector_anual', 'final')
-            forma_anual = change_df('forma_anual', 'final')
+            sector_anual = sector_anual_fi
+            forma_anual = forma_anual_fi
 
     # seleciona Sector
     if form_sect == 'Sector':
@@ -1165,28 +1349,26 @@ def update_donut(ano, form_sect, at, prim_fin):
         color_live = color_5_live_d
         color_dead = color_5_dead_d
         df = sector_anual
-        select = 'Transportes'
-        # if dd_select:
-        #
-        #     if dd_select in sector_list:
-        #         select = dd_select
-        #
-        #     else:
-        #         select = 'Transportes'
 
+        if dd_select:
 
-        # elif selecao:
-        #
-        #     select_1 = selecao['points'][0]['label']
-        #     if select_1 in sector_list:
-        #
-        #         select = select_1
-        #
-        #     else:
-        #         select = 'Transportes'
-        #
-        # else:
-        #     select = 'Transportes'
+            if dd_select in sector_list:
+                select = dd_select
+
+            else:
+                select = 'Transportes'
+
+        elif selecao:
+            select_1 = selecao['points'][0]['label']
+            if select_1 in sector_list:
+
+                select = select_1
+
+            else:
+                select = 'Transportes'
+
+        else:
+            select = 'Transportes'
 
     # seleciona Forma
     else:
@@ -1195,42 +1377,26 @@ def update_donut(ano, form_sect, at, prim_fin):
         df = forma_anual.iloc[:, :-1]
         color_live = color_7_live_d
         color_dead = color_7_dead_d
-        select = 'Electricidade'
 
+        if dd_select:
 
-        # if dd_select:
-        #
-        #     if dd_select in forma_list:
-        #         select = dd_select
-        #     else:
-        #         select = 'Electricidade'
-        #
-        # elif selecao:
-        #
-        #     select_1 = selecao['points'][0]['label']
-        #
-        #     if select_1 in forma_list:
-        #         select = select_1
-        #     else:
-        #         select = 'Electricidade'
+            if dd_select in forma_list:
+                select = dd_select
+            else:
+                select = 'Electricidade'
 
-        # else:
-        #     select = 'Electricidade'
+        elif selecao:
 
+            select_1 = selecao['points'][0]['label']
 
-    layout_donut['legend'] = go.layout.Legend(
+            if select_1 in forma_list:
+                select = select_1
+            else:
+                select = 'Electricidade'
 
-                            # x=1.1,
-                            # y=-0.2,
-                            traceorder="normal",
-                            font=dict(
-                                # size=13,
-                                color="black"
-                            ),
-                            bgcolor='rgba(0,0,0,0)',
-                            orientation='h'
-                            )
-    layout_donut['autosize'] = True
+        else:
+            select = 'Electricidade'
+
 
     # filtra por ano, atribui cores e remove os valores nulos
 
@@ -1239,18 +1405,18 @@ def update_donut(ano, form_sect, at, prim_fin):
     df.sort_index(inplace=True)
     df['labels'] = df.index
 
-    # s_f_lista_cut = s_f_lista.copy()
-    # s_f_lista_cut.remove(select)
+    s_f_lista_cut = s_f_lista.copy()
+    s_f_lista_cut.remove(select)
 
     df['color_fill'] = df['labels'].apply(lambda x: color_dead[x])
     df['color_line'] = df['labels'].apply(lambda x: color_live[x])
 
-    # for c in s_f_lista_cut:
-    #     df.loc[(df.index == c), 'color_fill'] = color_dead[c]
-    #     df.loc[(df.index == c), 'color_line'] = color_live[c]
+    for c in s_f_lista_cut:
+        df.loc[(df.index == c), 'color_fill'] = color_dead[c]
+        df.loc[(df.index == c), 'color_line'] = color_live[c]
 
-    # df.loc[(df.index == select), 'color_fill'] = color_live[select]
-
+    df.loc[(df.index == select), 'color_fill'] = color_live[select]
+    # df.loc[(df.index == select), 'color_line'] = "#FFFFFF"
 
     df = df[(df != 0).all(1)]
     df = df.drop(['labels'], axis=1)
@@ -1272,12 +1438,9 @@ def update_donut(ano, form_sect, at, prim_fin):
     my_text_write = ['{}'.format(p) + '%'
                      for p in percentagens]
 
-    # my_text_write = [fs + ': ' + '{:.0f}'.format(sel) + ' | ' + unidade + '<br>Ano: ' + '{}'.format(ano)
-    #                  for fs, sel in zip(df.index.tolist(), list(df[ano]))]
-
     fig = go.Figure(data=[go.Pie(labels=df.index.tolist(),
                     values=df[ano].tolist(),
-                    hole=0.6,
+                    hole=0.4,
                     marker=dict(colors=df['color_fill'], line=dict(color=df['color_line'], width=2)),
                     text=my_text_write,
                     textinfo='text',
@@ -1288,19 +1451,7 @@ def update_donut(ano, form_sect, at, prim_fin):
                     sort=False)])
 
 
-    layout_donut['margin'] = dict(l=25, r=35, b=20, t=20)
-    # layout_donut['autosize'] = True
-
-    # anot = [go.layout.Annotation(
-    #         text=select + '<br>' + str(df.loc[df.index == select, ano].item()) + ' | ' + unidade,
-    #     showarrow=False,
-    #     )]
-
     fig.update_layout(layout_donut)
-    # fig.update_layout(annotations=anot)
-
-
-
     return fig
 
 
@@ -1354,7 +1505,7 @@ def update_dropdown_items(form_sect, selecao):
      Output("text-bar", "children"),
      Output("text-bar-div", "style"),
      Output("bar-single-graph", "figure")],
-    [Input("year-selected", "value"),
+    [Input("mem-year", "children"),
      Input('dd-forma-sector', 'value'),
      Input('donut-graph', 'clickData'),
      Input('dd-primaria-final', 'value'),
@@ -1363,9 +1514,14 @@ def update_dropdown_items(form_sect, selecao):
 
      ]
 )
-def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
+def update_bar_single(ano_mem, form_sect, selecao, prim_fin, at, dd_select):
     if not dash.callback_context.triggered:
         raise PreventUpdate
+
+    try:
+        ano = int(json.loads(ano_mem))
+    except (ValueError, TypeError) as e:
+        ano = 2016
 
 
     if at == "tab-emissoes":
@@ -1380,14 +1536,12 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
         unidade_2 = " " + unidades_energia
 
         if prim_fin == 'Primária':
-            sector_df = change_df('sector_df', 'primaria')
-            forma_df = change_df('forma_df', 'primaria')
+            sector_df = sector_df_pr
+            forma_df = forma_df_pr
 
         else:
-            sector_df = change_df('sector_df', 'final')
-            forma_df = change_df('forma_df', 'final')
-
-    layout_bar_single = copy.deepcopy(layout)
+            sector_df = sector_df_fi
+            forma_df = forma_df_fi
 
     if form_sect == 'Sector':
 
@@ -1513,9 +1667,6 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
             values[index_pos] = values[index_pos] * 1000
             unidades[index_pos] = unidade_2
 
-
-
-
     my_text_hover = [fs + '<br>' + '{:.0f}'.format(sel) + un + '<br>' + '{:.2f}'.format(pr)
                      + '%' + '<br>Ano: ' + '{}'.format(ano)
                      for fs, sel,un, pr in zip(list(df[forma_sector]), values, unidades, list(df['Percentagem']))]
@@ -1538,9 +1689,7 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
 
     )])
     style = {"textAlign": "center", "backgroundColor": bg_color}
-    layout_bar_single['margin'] = dict(l=0, r=0, b=0, t=0)
-    layout_bar_single['height'] = 300
-    layout_bar_single['hovermode'] = "y"
+
     #layout_bar_single['title'] = dict(text=select, font=dict(size=13), xref='paper', x=0.3)
 
     fig.update_layout(layout_bar_single)
@@ -1552,13 +1701,13 @@ def update_bar_single(ano, form_sect, selecao, prim_fin, at, dd_select):
 
 @app.callback(
     Output("ano-line-graph", "figure"),
-    [Input("year-selected", "value"),
+    [
      Input('dd-forma-sector', 'value'),
      Input('dd-primaria-final', 'value'),
      Input('tabs', 'active_tab')
      ]
 )
-def update_ano_line(ano, form_sect, prim_fin, at):
+def update_ano_line(form_sect, prim_fin, at):
     if not dash.callback_context.triggered:
         raise PreventUpdate
 
@@ -1578,15 +1727,13 @@ def update_ano_line(ano, form_sect, prim_fin, at):
 
 
         if prim_fin == 'Primária':
-            sector_anual = change_df('sector_anual', 'primaria')
-            forma_anual = change_df('forma_anual', 'primaria')
+            sector_anual = sector_anual_pr
+            forma_anual = forma_anual_pr
             title_2 = prim_fin + " anual, por "
 
         else:
-            sector_anual = change_df('sector_anual', 'final')
-            forma_anual = change_df('forma_anual', 'final')
-
-    layout_ano_line = copy.deepcopy(layout)
+            sector_anual = sector_anual_fi
+            forma_anual = forma_anual_fi
 
     if form_sect == 'Sector':
         df = sector_anual
@@ -1643,15 +1790,6 @@ def update_ano_line(ano, form_sect, prim_fin, at):
                                  hoverlabel=dict(bgcolor=color_fill[i])))
         i += 1
 
-    layout_ano_line['legend'] = go.layout.Legend(
-                            font=dict(
-                                # size=13,
-                                color="black"
-                            ))
-    layout_ano_line['hovermode'] = "x"
-    layout_ano_line['margin'] = dict(l=20, r=150, b=20, t=20)
-    layout_ano_line['height'] = 300
-    layout_ano_line['hoverlabel'] = dict(font=dict(family=layout['font']['family']))
 
     # layout_ano_line['title'] = dict(text=title, xref='paper', x=0.5)
 
@@ -1660,4 +1798,4 @@ def update_ano_line(ano, form_sect, prim_fin, at):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=5000)
