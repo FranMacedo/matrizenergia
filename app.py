@@ -12,6 +12,7 @@ from flask import send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 import os
 import json
+import psycopg2
 # import figures_save
 
 ctx = dash.callback_context
