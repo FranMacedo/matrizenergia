@@ -240,6 +240,9 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 app.css.config.serve_locally = True
 app.scripts.config.serve_locally = True
+
+SQL_ALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 app.server.config['SECRET_KEY'] = '60b69ea75d65bfc586c4e778a9357219'
 app.server.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.server.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
