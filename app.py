@@ -298,7 +298,7 @@ layout_donut['margin'] = dict(l=25, r=35, b=20, t=20)
 
 
 layout_bar_single = copy.deepcopy(layout)
-layout_bar_single['margin'] = dict(l=0, r=0, b=0, t=0)
+layout_bar_single['margin'] = dict(l=0, r=30, b=0, t=0)
 layout_bar_single['height'] = 300
 layout_bar_single['hovermode'] = "y"
 
@@ -544,13 +544,13 @@ info_button_year = html.Div(
         dbc.Tooltip(target="target_year",
                     style={'font-size': '1.4rem'}, id='tt-year-bar'),
     ],
-    className="p-2 text-muted"
+    className="p-1 text-muted"
 )
 
 # slider + grafico de barras
 year_selector = html.Div([
 # "<br>(Seleccione o ano pretendido)"
-    dbc.Row([html.H5(id='header-ano-bar', style={'textAlign': 'center', "padding": "0% 0% 0% 0%"}),info_button_year], align='center', justify='center'),
+    dbc.Row([html.H5(id='header-ano-bar', style={'textAlign': 'center'}),info_button_year], align='center', justify='center',style={'textAlign': 'center', "margin": "0% 4% 0% 4%"}),
     html.P(dcc.Markdown('''**Seleccione o ano pretendido:**'''), style={'textAlign': 'center', "padding": "0% 0% 1% 0%", 'font-style': 'italic'}),
 
     html.Div(
