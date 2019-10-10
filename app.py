@@ -242,11 +242,11 @@ server = app.server
 app.css.config.serve_locally = True
 app.scripts.config.serve_locally = True
 
-# app.server.config['SECRET_KEY'] = '60b69ea75d65bfc586c4e778a9357219'
-# app.server.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-# HEROKU
 app.server.config['SECRET_KEY'] = '60b69ea75d65bfc586c4e778a9357219'
-app.server.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://jedcrkiqvpgghw:a55d8ab5271e0b58a11aa3f350384741181a593f53d5c4da6ccbd4fd2db74737@ec2-54-246-100-246.eu-west-1.compute.amazonaws.com:5432/da5crrdk573292'
+app.server.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+# HEROKU
+# app.server.config['SECRET_KEY'] = '60b69ea75d65bfc586c4e778a9357219'
+# app.server.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://jedcrkiqvpgghw:a55d8ab5271e0b58a11aa3f350384741181a593f53d5c4da6ccbd4fd2db74737@ec2-54-246-100-246.eu-west-1.compute.amazonaws.com:5432/da5crrdk573292'
 
 app.server.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -331,7 +331,8 @@ layout_ano_line['hoverlabel'] = dict(font=dict(family=layout['font']['family']))
 
 SIDEBAR_STYLE = {
     "background-color": "#f8f9fa",
-    "padding": "10% 1%",
+    "padding": "0% 2% 0% 2%",
+
     'height': '100%',
     'font-family': layout['font']['family'],
     'margin-bottom': '0'
@@ -533,7 +534,7 @@ card_forma_sector = html.Div(
 
 ##029CDE , "background-color": "#029CDE"
 def create_year_button(ano):
-    butao = dbc.Button(ano, color='primary', outline=True, id='sel_{}'.format(ano), style={'width': '{}%'.format(100/len(anos))})
+    butao = dbc.Button(ano, color='primary', outline=True, id='sel_{}'.format(ano), className='bt-anos')
 
     return butao
 
@@ -550,7 +551,7 @@ info_button_year = html.Div(
 year_selector = html.Div([
 # "<br>(Seleccione o ano pretendido)"
     dbc.Row([html.H5(id='header-ano-bar', style={'textAlign': 'center', "padding": "0% 0% 0% 0%"}),info_button_year], align='center', justify='center'),
-    html.P(dcc.Markdown('''**Seleccione o ano pretendido:**'''), style={'textAlign': 'center', "padding": "0% 0% 10% 0%", 'font-style': 'italic'}),
+    html.P(dcc.Markdown('''**Seleccione o ano pretendido:**'''), style={'textAlign': 'center', "padding": "0% 0% 1% 0%", 'font-style': 'italic'}),
 
     html.Div(
         [create_year_button(2008), create_year_button(2009), create_year_button(2010),
@@ -656,8 +657,13 @@ sidebar = html.Div(
         html.Div(dbc.Row([html.P('Emissões de CO2:', style={'textAlign': 'center'}), download_button_em], align='center', justify='center'), id="down-em-container", style={'display': 'none'}),
         html.Div(
             [
-            dbc.Row([html.P('Energia Final:', style={'textAlign': 'center'}), download_button_f], align='center', justify='center'),
-            dbc.Row([html.P('Energia Primária:', style={'textAlign': 'center'}), download_button_p], align='center', justify='center'),
+            dbc.Row(
+                [
+                dbc.Col(dbc.Row([html.P('Energia Final:'), download_button_f],align='center', justify='center'), md=6),
+                dbc.Col(dbc.Row([html.P('Energia Primária:'), download_button_p],align='center', justify='center'), md=6)
+                 ],
+
+                align='center',  justify='center'),
             ],
             id="down-pf-container")
 
@@ -738,16 +744,16 @@ single_bar_container = html.Div([
                     html.Div(
                         [
                             dbc.Row([
-                                dbc.Col(html.Div(id='select-dd-text'), width=5, style={'font-style': 'italic', 'textAlign': 'right', 'padding': '0% 2%'}),
+                                dbc.Col(html.Div(id='select-dd-text'), lg=4, style={'font-style': 'italic', 'padding': '0% 2%', 'textAlign':'center'}),
                                 dbc.Col(
                                     dcc.Dropdown(
                                         id='dropdown-single',
                                         clearable=False,
-                                            ), width=4
+                                            ), lg=4
                                 ),
-                                dbc.Col(html.Div(id='value-dd-text'), width=3,
-                                        style={'font-weight': 'bold', "textAlign": "center"})
-                            ],  no_gutters=True, justify='center', align="center"),
+                                dbc.Col(html.Div(id='value-dd-text'), lg=3,
+                                        style={'font-weight': 'bold', "textAlign": "center", 'font-size': '1.7rem'})
+                            ],  no_gutters=True,  align="center", justify='center'),
 
                             html.Hr(),
 
@@ -805,21 +811,21 @@ app.layout = html.Div([
 
     dbc.Row(
         [
-            dbc.Col(sidebar, width=4, style=dict(font=layout['font'])),
+            dbc.Col(sidebar, md=4, style=dict(font=layout['font'])),
 
             dbc.Col([
 
                 dbc.Row([
-                    dbc.Col(donut_container, width=6),
-                    dbc.Col(single_bar_container, width=6),
+                    dbc.Col(donut_container, md=6),
+                    dbc.Col(single_bar_container, md=6),
                     ], justify="start"),
 
                 dbc.Row([
-                    dbc.Col(year_line_container, width=12)
+                    dbc.Col(year_line_container, md=12)
                 ], justify="start")
 
             ],
-                width=8)
+                md=8)
 
         ],
         justify="start"
