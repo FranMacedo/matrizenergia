@@ -543,6 +543,8 @@ def create_year_button(ano):
 
     return butao
 
+
+
 info_button_year = html.Div(
     [
         html.I(className="fas fa-question-circle fa-sm", id="target_year"),
@@ -561,7 +563,9 @@ year_selector = html.Div([
     html.Div(
         [create_year_button(2008), create_year_button(2009), create_year_button(2010),
          create_year_button(2011), create_year_button(2012), create_year_button(2013),
-         create_year_button(2014), create_year_button(2015), create_year_button(2016), create_year_button(2017)],
+         create_year_button(2014), create_year_button(2015), create_year_button(2016),
+         dbc.Button(2017, color='primary', outline=False, id='sel_2017', className='bt-anos')
+],
         # style={'textAlign': "center", "margin-left": "1rem", "margin-right": "1rem", "padding": "1rem 1rem"}
     ),
     html.Div(children=json.dumps(str(2017)), id='mem-year', style={'display':'none'}),
@@ -1192,7 +1196,8 @@ def update_button_outline(ano_bar_graph_selected, sel_2008, sel_2009, sel_2010, 
         anos_bool = [ctx.triggered[0]['prop_id'] != f'sel_{a}.n_clicks' for a in anos]
 
         if sum(anos_bool) == len(anos):
-            anos_bool = [True]*(len(anos)-1) + [False]
+            #anos_bool = [True]*(len(anos)-1) + [False]
+            raise PreventUpdate
 
         a_pos = anos_bool.index(False)
         ano = anos[a_pos]
@@ -1343,7 +1348,8 @@ def header_donut_ano_line(ano_mem, at, prim_fin, form_sect):
     try:
         ano = int(json.loads(ano_mem))
     except (ValueError, TypeError) as e:
-        ano = 2017
+        # ano = 2017
+        raise PreventUpdate
 
     if at == "tab-emissoes":
         unidade = unidades_emissoes
@@ -1396,7 +1402,8 @@ def update_donut(ano_mem, form_sect,selecao, at, dd_select, prim_fin):
     try:
         ano = int(json.loads(ano_mem))
     except (ValueError, TypeError) as e:
-        ano = 2017
+        # ano = 2017
+        raise PreventUpdate
 
     if at == "tab-emissoes":
         forma_anual = forma_anual_em / 1000
@@ -1604,7 +1611,8 @@ def update_bar_single(ano_mem, form_sect, selecao, prim_fin, at, dd_select):
     try:
         ano = int(json.loads(ano_mem))
     except (ValueError, TypeError) as e:
-        ano = 2017
+        # ano = 2017
+        raise PreventUpdate
 
 
     if at == "tab-emissoes":
