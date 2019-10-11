@@ -564,7 +564,7 @@ year_selector = html.Div([
          create_year_button(2014), create_year_button(2015), create_year_button(2016), create_year_button(2017)],
         # style={'textAlign': "center", "margin-left": "1rem", "margin-right": "1rem", "padding": "1rem 1rem"}
     ),
-    html.Div(id='mem-year', style={'display':'none'}),
+    html.Div(children=json.dumps(str(2017)), id='mem-year', style={'display':'none'}),
     dcc.Loading(id="loading-ano-bar", type="circle",
                 children=[
                     dcc.Graph(id="ano-bar-graph", config={'displayModeBar': False})]),
@@ -1273,7 +1273,7 @@ def update_ano_bar(prim_fin, at, ano_mem):
     try:
         ano = int(json.loads(ano_mem))
     except (ValueError, TypeError) as e:
-        ano = 2017
+        raise PreventUpdate
 
     if at == "tab-emissoes":
         visi_em = {'display': 'inline'}
@@ -1510,8 +1510,6 @@ def update_donut(ano_mem, form_sect,selecao, at, dd_select, prim_fin):
     percentagens = ((df[ano]/sum(df[ano].tolist()))*100).tolist()
 
     percentagens = [round(p) if p > 1 else round(p, 2) for p in percentagens]
-
-    print(values)
 
     if prim_fin == 'Primária':
         my_text_hover = [fs + ': ' + '{:.0f}'.format(sel) + un + '<br>Ano: ' + '{}'.format(ano)
