@@ -600,7 +600,7 @@ width: 50%;
 
 /*ecras maiores*/
 @media only screen and (min-width: 1200px) {
-.bt-anos {width: 11.111111111111111111111111111111%;}
+.bt-anos {width: 10%;}
 
 }
 
