@@ -1907,4 +1907,4 @@ def update_ano_line(form_sect, prim_fin, at):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
