@@ -234,7 +234,7 @@ def get_ano_bar_plot():
         hoverlabel=dict(font=dict(family=layout['font']['family'])),
     )])
 
-    layout_ano_bar['margin'] = dict(l=0, r=0, b=0, t=0)
+    layout_ano_bar['margin'] = dict(l=0, r=4, b=0, t=0)
     layout_ano_bar['height'] = 200
     layout_ano_bar['dragmode'] = 'select'
     fig.update_layout(layout_ano_bar)
@@ -579,7 +579,7 @@ year_selector = html.Div([
          create_year_button(2014), create_year_button(2015), create_year_button(2016),
          dbc.Button(2017, color='primary', outline=False, id='sel_2017', className='bt-anos')
 ],
-        # style={'textAlign': "center", "margin-left": "1rem", "margin-right": "1rem", "padding": "1rem 1rem"}
+        style={"margin-right": "0.5rem"}
     ),
     html.Div(children=json.dumps(str(2017)), id='mem-year', style={'display':'none'}),
     dcc.Loading(id="loading-ano-bar", type="circle",
