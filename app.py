@@ -205,13 +205,15 @@ total_m_fi = ['{:,}'.format(int(tr)).replace(',', ' ') for tr in total_m_fi]
 total_m_fi = list(map(str, total_m_fi))
 # total_m_fi = [a + ' GWh' for a in total_m_fi]
 
-total_m_pr = list(round(forma_anual_pr['Total'] / 1000000, 1))
+total_m_pr = list(round(forma_anual_pr['Total'] / 1000, 1))
+total_m_pr = ['{:,}'.format(int(tr)).replace(',', ' ') for tr in total_m_pr]
 total_m_pr = list(map(str, total_m_pr))
-total_m_pr = [a + 'M' for a in total_m_pr]
+# total_m_pr = [a + 'M' for a in total_m_pr]
 
-total_m_em = list(round(forma_anual_em['Total'] / 1000000, 1))
+total_m_em = list(round(forma_anual_em['Total'] / 1000, 1))
+total_m_em = ['{:,}'.format(int(tr)).replace(',', ' ') for tr in total_m_em]
 total_m_em = list(map(str, total_m_em))
-total_m_em = [a + ' M' for a in total_m_em]
+# total_m_em = [a + ' M' for a in total_m_em]
 
 def get_ano_bar_plot():
     forma_anual = forma_anual_fi
@@ -234,7 +236,7 @@ def get_ano_bar_plot():
         hoverlabel=dict(font=dict(family=layout['font']['family'])),
     )])
 
-    layout_ano_bar['margin'] = dict(l=0, r=4, b=0, t=0)
+    layout_ano_bar['margin'] = dict(l=0, r=0, b=0, t=0)
     layout_ano_bar['height'] = 200
     layout_ano_bar['dragmode'] = 'select'
     fig.update_layout(layout_ano_bar)
@@ -284,7 +286,7 @@ layout = dict(
 
 )
 layout_ano_bar = copy.deepcopy(layout)
-layout_ano_bar['margin'] = dict(l=0, r=0, b=0, t=0)
+layout_ano_bar['margin'] = dict(l=0, r=4, b=0, t=0)
 layout_ano_bar['height'] = 200
 layout_ano_bar['dragmode'] = 'select'
 layout_ano_bar['xaxis'] = dict(fixedrange=True)
@@ -554,7 +556,6 @@ def create_year_button(ano):
     butao = dbc.Button(ano, color='primary', outline=True, id='sel_{}'.format(ano), className='bt-anos')
 
     return butao
-
 
 
 info_button_year = html.Div(
@@ -1283,16 +1284,16 @@ def headers_emissoes(at, prim_fin):
     if not dash.callback_context.triggered:
         raise PreventUpdate
     if at == "tab-emissoes":
-        return dcc.Markdown('''**ton** corresponde a toneladas de CO2.'''), 'Emissões de CO2 por ano (ton)', 'Emissões de CO2 por:'
+        return dcc.Markdown('''**k ton** corresponde a 1 000 toneladas de CO2.'''), 'Emissões de CO2 por ano (k ton)', 'Emissões de CO2 por:'
 
     else:
         if prim_fin == 'Primária':
-            head_a_b = 'Consumo total de Energia Primária anual (tep)'
-            return dcc.Markdown('''**tep** corresponde a tonelada equivalente de petróleo.'''), head_a_b, 'Seleccione a desagragação pretendida:'
+            head_a_b = 'Consumo total de Energia Primária anual (k tep)'
+            return dcc.Markdown('''**k tep** corresponde a 1 000 toneladas equivalentes de petróleo.'''), head_a_b, 'Seleccione a desagragação pretendida:'
         else:
 
             head_a_b = 'Consumo total de Energia Final anual (GWh)'
-            text_tool = dcc.Markdown('''**GWh** corresponde a Gigawatt-hora, ou seja, 1000 MWh.''')
+            text_tool = dcc.Markdown('''**GWh** (Gigawatt-hora) corresponde a 1 000 MWh ou 1 000 000 kWh.''')
 
             return text_tool, head_a_b, 'Seleccione a desagragação pretendida:'
 
@@ -1349,10 +1350,10 @@ def update_ano_bar(prim_fin, at, ano_mem):
         visi_em = {'display': 'inline'}
         visi_pf = {'display': 'none'}
 
-        forma_anual = forma_anual_em/1000
+        forma_anual = forma_anual_em
         total_m = total_m_em
         # unidade = unidades_emissoes
-        unidade = ton_k
+        unidade = ' ton'
 
 
 
@@ -1363,8 +1364,8 @@ def update_ano_bar(prim_fin, at, ano_mem):
         if prim_fin == 'Primária':
 
 
-            unidade = tep_k
-            forma_anual =forma_anual_pr/1000
+            unidade = ' tep'
+            forma_anual =forma_anual_pr
             total_m = total_m_pr
 
 
@@ -1712,8 +1713,8 @@ def update_bar_single(ano_mem, form_sect, selecao, prim_fin, at, dd_select):
             forma_df = forma_df_pr
 
         else:
-            unidade_1 = ' GW'
-            unidade_2 = " " + 'MW'
+            unidade_1 = ' GWh'
+            unidade_2 = " " + 'MWh'
 
             sector_df = sector_df_fi
             forma_df = forma_df_fi
@@ -2094,4 +2095,4 @@ def update_ano_line(form_sect, prim_fin, at):
 #     return fig
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
