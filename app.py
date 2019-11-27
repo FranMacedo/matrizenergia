@@ -273,8 +273,6 @@ class Pessoas(db.Model):
     def __repr__(self):
         return f"pessoas('{self.primaria}', '{self.final}', '{self.emissoes}')"
 
-
-
 layout = dict(
     font=dict(
         size=13,
