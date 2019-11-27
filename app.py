@@ -273,16 +273,22 @@ class Pessoas(db.Model):
     def __repr__(self):
         return f"pessoas('{self.primaria}', '{self.final}', '{self.emissoes}')"
 
+size_generico = 15
+family_generico = "'Abel', sans-serif"
+
+
 layout = dict(
     font=dict(
-        size=13,
-        family="'Abel', sans-serif",
+        size=size_generico,
+        family=family_generico,
     ),
     hovermode="closest",
     plot_bgcolor="#F9F9F9",
     paper_bgcolor="#F9F9F9",
-
+    hoverlabel=dict(font=dict(size=size_generico, family=family_generico))
 )
+
+
 layout_ano_bar = copy.deepcopy(layout)
 layout_ano_bar['margin'] = dict(l=0, r=4, b=0, t=0)
 layout_ano_bar['height'] = 200
@@ -770,6 +776,7 @@ single_bar_container = html.Div([
                                     dcc.Dropdown(
                                         id='dropdown-single',
                                         clearable=False,
+
                                             ), lg=4
                                 ),
                                 dbc.Col(html.Div(id='value-dd-text'), lg=3,
