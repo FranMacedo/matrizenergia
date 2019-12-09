@@ -296,7 +296,8 @@ class Pessoas(db.Model):
         return f"pessoas('{self.primaria}', '{self.final}', '{self.emissoes}')"
 
 size_generico = 15
-family_generico = "'Abel', sans-serif"
+# family_generico = "'Abel', sans-serif"
+family_generico = "'Questrial', sans-serif"
 
 
 layout = dict(
