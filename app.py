@@ -26,26 +26,29 @@ mw_k = "k MWh"
 mw_M = "Milhões MWh"
 
 
-color_7_live = ["#8DD3C7", "#fff069", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69"]
-color_7_dead = ["#d3ede9", "#FFF9C4", "#e3e1ed", "#f5d4d0", "#cee1ed", "#fae0c3", "#e7f2d3"]
+# color_6_live = ["#8DDç3C7", "#fff069", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69"]
+# color_6_dead = ["#d3ede9", "#FFF9C4", "#e3e1ed", "#f5d4d0", "#cee1ed", "#fae0c3", "#e7f2d3"]
+
+color_6_live = ["#8DD3C7", "#fff069", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462"]
+color_6_dead = ["#96ebde", "#f7efa6", "#c1bae8", "#f0ada5", "#a7d0eb", "#f0c595"]
 
 
-color_5_live = ["#8DD3C7", "#fff069", "#BEBADA", "#FB8072", "#80B1D3"]
-color_5_dead = ["#d3ede9", "#FFF9C4", "#e3e1ed", "#f5d4d0", "#cee1ed"]
+color_5_live = color_6_live[:5]
+color_5_dead = color_6_dead[:5]
 
-color_7_live_d = {"Gasóleo": color_7_live[0],
-                    "Electricidade": color_7_live[1],
-                    "Gás Natural": color_7_live[2],
-                    "Gasolina": color_7_live[3],
-                    "GPL": color_7_live[4],
-                    "Outros": color_7_live[5]}
+color_6_live_d = {"Gasóleo": color_6_live[0],
+                    "Electricidade": color_6_live[1],
+                    "Gás Natural": color_6_live[2],
+                    "Gasolina": color_6_live[3],
+                    "GPL": color_6_live[4],
+                    "Outros": color_6_live[5]}
 
-color_7_dead_d = {"Gasóleo": color_7_dead[0],
-                    "Electricidade":color_7_dead[1],
-                    "Gás Natural": color_7_dead[2],
-                    "Gasolina": color_7_dead[3],
-                    "GPL": color_7_dead[4],
-                    "Outros": color_7_dead[5]}
+color_6_dead_d = {"Gasóleo": color_6_dead[0],
+                    "Electricidade":color_6_dead[1],
+                    "Gás Natural": color_6_dead[2],
+                    "Gasolina": color_6_dead[3],
+                    "GPL": color_6_dead[4],
+                    "Outros": color_6_dead[5]}
 
 color_5_live_d = {"Agricultura": color_5_live[0],
                     "Doméstico": color_5_live[1],
@@ -116,15 +119,15 @@ unidades_energia = 'tep'
 #     forma_df['color_fill'] = forma_df['Sector'].apply(lambda x: color_5_dead_d[x])
 #     forma_df['color_line'] = forma_df['Sector'].apply(lambda x: color_5_live_d[x])
 #
-#     sector_df['color_fill'] = sector_df['Forma'].apply(lambda x: color_7_dead_d[x])
-#     sector_df['color_line'] = sector_df['Forma'].apply(lambda x: color_7_live_d[x])
+#     sector_df['color_fill'] = sector_df['Forma'].apply(lambda x: color_6_dead_d[x])
+#     sector_df['color_line'] = sector_df['Forma'].apply(lambda x: color_6_live_d[x])
 #
 #
 #     # forma_df['color_dead'] = color_5_dead * len(anos)
 #     # forma_df['color_live'] = color_5_live * len(anos)
 #     #
-#     # sector_df['color_dead'] = color_7_dead * len(anos)
-#     # sector_df['color_live'] = color_7_live * len(anos)
+#     # sector_df['color_dead'] = color_6_dead * len(anos)
+#     # sector_df['color_live'] = color_6_live * len(anos)
 #
 #     return forma_df, sector_df, forma_anual, sector_anual, forma_list, sector_list, anos
 
@@ -153,8 +156,8 @@ def cria_cores(cores_5_7, select):
         selec_list = sector_list
 
     else:
-        color_dead = color_7_dead
-        color_live = color_7_live
+        color_dead = color_6_dead
+        color_live = color_6_live
         selec_list = forma_list
 
     colors = color_dead.copy()
@@ -168,6 +171,11 @@ def cria_cores(cores_5_7, select):
 # energia_final_path = "data/energia_final.xlsx"
 # energia_primaria_path = "data/energia_primaria.xlsx"
 # emissoes_path = "data/emissoes_CO2.xlsx"
+
+
+def set_colors(df, pallete):
+    return pallete * int(len(df) / len(pallete))
+
 
 def create_anual(df):
     df_anual = df.groupby(['Ano']).sum()
@@ -185,6 +193,20 @@ populacao = pd.Series(
     [563312, 550466, 549210, 542917, 530847, 520549, 513064, 506892, 504718, 505526, 506654],
     index=[2001, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018],
 )
+
+
+forma_df_fi['color_fill'] = set_colors(forma_df_fi, color_5_dead)
+forma_df_fi['color_line'] = set_colors(forma_df_fi, color_5_live)
+sector_df_fi['color_fill'] = set_colors(sector_df_fi, color_6_dead)
+sector_df_fi['color_line'] = set_colors(sector_df_fi, color_6_live)
+forma_df_pr['color_fill'] = set_colors(forma_df_pr, color_5_dead)
+forma_df_pr['color_line'] = set_colors(forma_df_pr, color_5_live)
+sector_df_pr['color_fill'] = set_colors(sector_df_pr, color_6_dead)
+sector_df_pr['color_line'] = set_colors(sector_df_pr, color_6_live)
+forma_df_em['color_fill'] = set_colors(forma_df_em, color_5_dead)
+forma_df_em['color_line'] = set_colors(forma_df_em, color_5_live)
+sector_df_em['color_fill'] = set_colors(sector_df_em, color_6_dead)
+sector_df_em['color_line'] = set_colors(sector_df_em, color_6_live)
 
 forma_anual_fi = create_anual(forma_df_fi)
 sector_anual_fi = create_anual(sector_df_fi).iloc[:, :-1]
@@ -217,7 +239,7 @@ total_m_em = list(map(str, total_m_em))
 
 def get_ano_bar_plot():
     forma_anual = forma_anual_fi
-    color_fill = ['#9BD7F1', ] * len(forma_anual.index)
+    color_fill = ['#85ceed', ] * len(forma_anual.index)
     color_fill[-1] = '#029CDE'
     color_line = ['#029CDE', ] * len(forma_anual.index)
     total_m = total_m_fi
@@ -1385,7 +1407,7 @@ def update_ano_bar(prim_fin, at, ano_mem):
         ano_posi = list(forma_anual.index).index(ano)
     except ValueError:
         ano_posi = list(forma_anual.index).index(2009)
-    color_fill = ['#9BD7F1', ] * len(forma_anual.index)
+    color_fill = ['#85ceed', ] * len(forma_anual.index)
     color_fill[ano_posi] = '#029CDE'
     color_line = ['#029CDE', ]*len(forma_anual.index)
 
@@ -1545,8 +1567,8 @@ def update_donut(ano_mem, form_sect, selecao, at, dd_select, prim_fin):
         s_f_lista = forma_list
 
         df = forma_anual.iloc[:, :-1]
-        color_live = color_7_live_d
-        color_dead = color_7_dead_d
+        color_live = color_6_live_d
+        color_dead = color_6_dead_d
 
         if dd_select:
 
@@ -1810,7 +1832,7 @@ def update_bar_single(ano_mem, form_sect, selecao, prim_fin, at, dd_select):
 
 
 
-        bg_color = color_7_dead_d[select]
+        bg_color = color_6_dead_d[select]
 
     df = df.loc[(df['Ano'] == ano), [forma_sector, select, 'color_fill', 'color_line']]
 
@@ -1938,8 +1960,8 @@ def update_ano_line(form_sect, prim_fin, at):
     else:
         df = forma_anual.iloc[:, :-1]
         lista_index = list(df.sum().sort_values().index)
-        color_line = [color_7_live_d[x] for x in lista_index]
-        color_fill = [color_7_dead_d[x] for x in lista_index]
+        color_line = [color_6_live_d[x] for x in lista_index]
+        color_fill = [color_6_dead_d[x] for x in lista_index]
         # my_text = ['Diesel: ' + '{:.0f}'.format(ds) + '<br>Electricidade: ' + '{:.0f}'.format(el) +
         #            '<br>Gás Natural: ' + '{:.0f}'.format(gn) + '<br>Gasolina: ' + '{:.0f}'.format(gl)
         #            + '<br>GPL: ' + '{:.0f}'.format(gpl) + '<br>Fuel: ' + '{:.0f}'.format(fu) + '<br>Outros: '
@@ -2043,8 +2065,8 @@ def update_ano_line(form_sect, prim_fin, at):
 #     else:
 #         df = forma_dom_anual.iloc[:, :-1]
 #         lista_index = list(df.sum().sort_values().index)
-#         color_line = [color_7_live_d[x] for x in lista_index]
-#         color_fill = [color_7_dead_d[x] for x in lista_index]
+#         color_line = [color_6_live_d[x] for x in lista_index]
+#         color_fill = [color_6_dead_d[x] for x in lista_index]
 #         # my_text = ['Diesel: ' + '{:.0f}'.format(ds) + '<br>Electricidade: ' + '{:.0f}'.format(el) +
 #         #            '<br>Gás Natural: ' + '{:.0f}'.format(gn) + '<br>Gasolina: ' + '{:.0f}'.format(gl)
 #         #            + '<br>GPL: ' + '{:.0f}'.format(gpl) + '<br>Fuel: ' + '{:.0f}'.format(fu) + '<br>Outros: '
@@ -2101,3 +2123,4 @@ def update_ano_line(form_sect, prim_fin, at):
 
 if __name__ == '__main__':
     app.run_server(debug=False)
+    # app.run_server(debug=True, port=5000)
